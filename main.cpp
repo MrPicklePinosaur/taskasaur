@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <string>
 #include <ncurses.h>
+#include <signal.h>
 using namespace std;
 
 bool file_exists(const char* file_name) {
@@ -10,8 +11,14 @@ bool file_exists(const char* file_name) {
     return (bool)test_file;
 }
 
+void winch_handler(int signum) { // handle terminal resize
+    refresh();
+}
+
 int main(int argc, char** argv) {
-    
+   
+   signal(SIGWINCH, winch_handler); 
+
     // read command line args
     if (argc < 2) {
         cout << "Taskasaur options\n-o [board_name]\n-n [new_board+name]";
@@ -48,7 +55,7 @@ int main(int argc, char** argv) {
 
         }
     }   
-    return 0;
+    /* return 0; */
 
    
     // start ncurses 
