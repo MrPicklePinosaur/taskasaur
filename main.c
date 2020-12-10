@@ -3,7 +3,19 @@
 #include <signal.h>
 #include <unistd.h>
 
-int main(int argc, char** argv) {
+void winch_handler(int sig); 
+
+WINDOW* create_list_win(int height, int width, int y, int x);
+
+int 
+main(int argc, char** argv) 
+{
+    int height, width;
+    int x, y;
+    int ch;
+    WINDOW* todo_win;
+
+    signal(SIGWINCH, winch_handler);
 
     // start ncurses 
     initscr();
@@ -15,19 +27,14 @@ int main(int argc, char** argv) {
     init_pair(1, COLOR_CYAN, COLOR_BLACK); 
     init_pair(2, COLOR_BLACK, COLOR_CYAN); 
 
-    int height, width;
     getmaxyx(stdscr, height, width);
-
-    WINDOW * win = newwin(10,20,5,10); 
-    WINDOW * todo_win = newwin(20,20,5,35);
-    WINDOW * bottombar = newwin(1,width,height-1,0); 
-    refresh();
-    
-    int x, y;
     x = y = 0;
+    refresh();
 
-    while (true) {
-        int ch = getch();
+    todo_win = create_list_win(20, 20, 5, 5);
+    
+    move(y,x);
+    while ((ch = getch()) != 113) {
         
         //ofc the first thing we need is vim keys 
         switch (ch) {
@@ -44,22 +51,6 @@ int main(int argc, char** argv) {
                 x += 1;
                 break;
         } 
-        if (ch == 113) break; // q for quit
-
-        box(win, 0, 0);
-        wattron(win,COLOR_PAIR(1));
-        wattron(win, A_BOLD);
-        mvwprintw(win, 0, 1, "lmao");
-        wattroff(win, A_BOLD);
-        wattroff(win,COLOR_PAIR(1));
-        mvwprintw(win, 1, 2, "poopoopeepee");
-        wrefresh(win);
-
-        wrefresh(todo_win);
-
-        wbkgd(bottombar, COLOR_PAIR(2));        
-        mvwprintw(bottombar, 0, 2, "BOTTOM TEXT");
-        wrefresh(bottombar);
 
         move(y,x);
         refresh();
@@ -68,4 +59,20 @@ int main(int argc, char** argv) {
 
     endwin();
     return 0;
+}
+
+void 
+winch_handler(int sig) 
+{
+    endwin();
+    refresh();
+}
+
+WINDOW* 
+create_list_win(int height, int width, int y, int x)
+{
+    WINDOW* new_win = newwin(height, width, y, x);
+    box(new_win, 0, 0);
+    wrefresh(new_win);
+    return new_win;
 }
