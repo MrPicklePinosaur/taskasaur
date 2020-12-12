@@ -7,15 +7,26 @@ void winch_handler(int sig);
 
 WINDOW* create_list_win(int height, int width, int y, int x);
 
+#include "config.h"
+
 int 
 main(int argc, char** argv) 
 {
+    FILE* board_file;
     int height, width;
     int x, y;
     int ch;
     WINDOW* todo_win;
 
     signal(SIGWINCH, winch_handler);
+
+    // read from task file
+    board_file = fopen(default_board_file, "r");
+    if (!board_file) {
+        printf("File does not exist\n");
+        return 1;
+    }   
+    fclose(board_file);
 
     // start ncurses 
     initscr();
@@ -34,9 +45,9 @@ main(int argc, char** argv)
     todo_win = create_list_win(20, 20, 5, 5);
     
     move(y,x);
-    while ((ch = getch()) != 113) {
+    while ((ch = getch()) != 113) { // while not q
         
-        //ofc the first thing we need is vim keys 
+        // ofc the first thing we need is vim keys 
         switch (ch) {
             case 104: // h
                 x -= 1;
