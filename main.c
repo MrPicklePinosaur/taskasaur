@@ -12,6 +12,7 @@ WINDOW* create_list_win(int height, int width, int y, int x);
 int 
 main(int argc, char** argv) 
 {
+    int flag;
     FILE* board_file;
     int height, width;
     int x, y;
@@ -20,13 +21,41 @@ main(int argc, char** argv)
 
     signal(SIGWINCH, winch_handler);
 
-    // read from task file
-    board_file = fopen(default_board_file, "r");
-    if (!board_file) {
-        printf("File does not exist\n");
-        return 1;
-    }   
-    fclose(board_file);
+    // read command line args
+    flag = getopt(argc, argv, "o:n::");
+    switch (flag) {
+        case 'o':
+
+            // read from task file (might need to check for read and write permissions)
+            board_file = fopen(optarg, "r");
+            if (!board_file) {
+                printf("%s does not exist\n", optarg);
+                return 1;
+            }   
+            break;
+
+        case 'n':
+            /* ; */
+            /* char to_create[]; */
+            /* to_create = (optarg == 0) ? default_board : optarg; */
+
+            // make sure file does not exist
+            // however, it maybe be possible that an different error has occured (besides the file not existing)
+            if (access(optarg, F_OK) == 0) { 
+                printf("%s already exists\n", optarg);
+                return 1;
+            }
+            /* printf("Successfully created %s\n", to_create); */
+            break;
+
+        case -1:
+        case '?':
+            printf("Help string\n");
+            return 2;
+
+    }
+
+    return 0;
 
     // start ncurses 
     initscr();
