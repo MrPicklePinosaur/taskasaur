@@ -6,7 +6,7 @@
 
 void winch_handler(int sig); 
 
-char** read_todo(FILE* file);
+char** read_todo(FILE* file, int* length);
 
 WINDOW* create_list_win(int height, int width, int y, int x);
 
@@ -17,6 +17,8 @@ main(int argc, char** argv)
 {
     int flag;
     FILE* board_file;
+    char** todos;
+    int todo_length;
     int height, width;
     int x, y;
     int ch;
@@ -36,8 +38,7 @@ main(int argc, char** argv)
                 return 1;
             }   
             
-            char** todos = read_todo(board_file);
-            printf(todos[0]);
+            todos = read_todo(board_file, &todo_length);
             fclose(board_file);
 
             break;
@@ -51,7 +52,14 @@ main(int argc, char** argv)
                 return 1;
             }
             // create a file here
+            board_file = fopen(optarg, "w");
+            // write init stuff here
+            fclose(board_file);
             printf("Successfully created %s\n", optarg);
+
+            todos = malloc(0);
+            todo_length = 0;
+
             break;
 
         case -1:
@@ -61,14 +69,12 @@ main(int argc, char** argv)
     }
 
 
-
-    return 0;
-
     // start ncurses 
     initscr();
     cbreak();
     /* raw(); */
     noecho();
+    curs_set(0);
     start_color();
     
     init_pair(1, COLOR_CYAN, COLOR_BLACK); 
@@ -78,7 +84,11 @@ main(int argc, char** argv)
     x = y = 0;
     refresh();
 
-    todo_win = create_list_win(20, 20, 5, 5);
+    todo_win = create_list_win(20, 40, 5, 5);
+    for (int i = 0; i < todo_length; i++) {
+        mvwprintw(todo_win, i+1, 2, todos[i]);
+    }
+    wrefresh(todo_win);
     
     move(y,x);
     while ((ch = getch()) != 113) { // while not q
@@ -105,6 +115,10 @@ main(int argc, char** argv)
     }
 
     endwin();
+
+    /* Free mem */
+    free(todos); // prob need to free each string in list too
+
     return 0;
 }
 
@@ -115,9 +129,8 @@ winch_handler(int sig)
     refresh();
 }
 
-
 char**
-read_todo(FILE* file) 
+read_todo(FILE* file, int* length) 
 { // apparently getline isn't rly that portable, so consider other options
     char** out_arr;
     int out_len;
@@ -133,13 +146,20 @@ read_todo(FILE* file)
     while ((nread = getline(&lineptr, &len, file)) != -1) {
         out_len++;
         out_arr = realloc(out_arr, (sizeof(char*))*out_len); // bad to keep resizing?
-        printf("Pointer set to: %p\n", lineptr);
+        // remove new line character (maybe just write own new line func later)
+        /* lineptr = realloc(*lineptr, len-2); */
+        /* *(lineptr+len-1) = '\0'; */
+        /* printf(lineptr); */
+        /* lineptr = realloc(lineptr, len-1); //maybe watch out for empty lines */
+        /* *(lineptr+len-3) = '\0'; */
+
         out_arr[out_len-1] = lineptr;
 
         lineptr = NULL;
         len = 0;
     }
-
+    
+    *length = out_len;
     return out_arr;
 }
 
