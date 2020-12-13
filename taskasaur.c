@@ -1,14 +1,17 @@
 #include <stdio.h>
-#include <ncurses.h>
-#include <signal.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <unistd.h>
+#include <ncurses.h>
+#include <menu.h>
 
 void winch_handler(int sig); 
 
 char** read_todo(FILE* file, int* length);
 
 WINDOW* create_list_win(int height, int width, int y, int x);
+
+void draw_todo(WINDOW* todo_win, char** todo_list, int todo_length);
 
 #include "config.h"
 
@@ -85,10 +88,7 @@ main(int argc, char** argv)
     refresh();
 
     todo_win = create_list_win(20, 40, 5, 5);
-    for (int i = 0; i < todo_length; i++) {
-        mvwprintw(todo_win, i+1, 2, todos[i]);
-    }
-    wrefresh(todo_win);
+    draw_todo(todo_win, todos, todo_length);
     
     move(y,x);
     while ((ch = getch()) != 113) { // while not q
@@ -146,13 +146,6 @@ read_todo(FILE* file, int* length)
     while ((nread = getline(&lineptr, &len, file)) != -1) {
         out_len++;
         out_arr = realloc(out_arr, (sizeof(char*))*out_len); // bad to keep resizing?
-        // remove new line character (maybe just write own new line func later)
-        /* lineptr = realloc(*lineptr, len-2); */
-        /* *(lineptr+len-1) = '\0'; */
-        /* printf(lineptr); */
-        /* lineptr = realloc(lineptr, len-1); //maybe watch out for empty lines */
-        /* *(lineptr+len-3) = '\0'; */
-
         out_arr[out_len-1] = lineptr;
 
         lineptr = NULL;
@@ -167,7 +160,15 @@ WINDOW*
 create_list_win(int height, int width, int y, int x)
 {
     WINDOW* new_win = newwin(height, width, y, x);
-    box(new_win, 0, 0);
     wrefresh(new_win);
     return new_win;
+}
+
+void 
+draw_todo(WINDOW* todo_win, char** todo_list, int todo_length) {
+    for (int i = 0; i < todo_length; i++) {
+        mvwprintw(todo_win, i+1, 2, todo_list[i]);
+    }
+    box(todo_win, 0, 0);
+    wrefresh(todo_win);
 }
