@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <ncurses.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <unistd.h>
 
+#define MAX_TODO_LENGTH 200
+
 void winch_handler(int sig); 
+
+char* read_todo(FILE* file);
 
 WINDOW* create_list_win(int height, int width, int y, int x);
 
@@ -22,7 +27,7 @@ main(int argc, char** argv)
     signal(SIGWINCH, winch_handler);
 
     // read command line args
-    flag = getopt(argc, argv, "o:n::");
+    flag = getopt(argc, argv, "o:n:");
     switch (flag) {
         case 'o':
 
@@ -32,12 +37,16 @@ main(int argc, char** argv)
                 printf("%s does not exist\n", optarg);
                 return 1;
             }   
+            
+            char* lineptr = read_todo(board_file);
+            printf("lineptr: %p\n", lineptr);
+            printf("first: %c\n", *lineptr);
+            free(lineptr);
+            fclose(board_file);
+
             break;
 
         case 'n':
-            /* ; */
-            /* char to_create[]; */
-            /* to_create = (optarg == 0) ? default_board : optarg; */
 
             // make sure file does not exist
             // however, it maybe be possible that an different error has occured (besides the file not existing)
@@ -45,15 +54,17 @@ main(int argc, char** argv)
                 printf("%s already exists\n", optarg);
                 return 1;
             }
-            /* printf("Successfully created %s\n", to_create); */
+            // create a file here
+            printf("Successfully created %s\n", optarg);
             break;
 
         case -1:
         case '?':
             printf("Help string\n");
             return 2;
-
     }
+
+
 
     return 0;
 
@@ -106,6 +117,24 @@ winch_handler(int sig)
 {
     endwin();
     refresh();
+}
+
+
+char*
+read_todo(FILE* file) 
+{ // apparently getline isn't rly that portable, so consider other options
+    char* lineptr;
+    size_t len;
+    ssize_t nread;
+
+    lineptr = NULL;
+    len = 0;
+
+    while ((nread = getline(&lineptr, &len, file)) != -1) {
+        printf("Read line of size %zd\n", nread);
+    }
+
+    return lineptr;
 }
 
 WINDOW* 
