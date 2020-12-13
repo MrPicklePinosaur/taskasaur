@@ -8,7 +8,7 @@
 
 void winch_handler(int sig); 
 
-char* read_todo(FILE* file);
+char** read_todo(FILE* file);
 
 WINDOW* create_list_win(int height, int width, int y, int x);
 
@@ -38,10 +38,8 @@ main(int argc, char** argv)
                 return 1;
             }   
             
-            char* lineptr = read_todo(board_file);
-            printf("lineptr: %p\n", lineptr);
-            printf("first: %c\n", *lineptr);
-            free(lineptr);
+            char** todos = read_todo(board_file);
+            printf(todos[0]);
             fclose(board_file);
 
             break;
@@ -120,21 +118,31 @@ winch_handler(int sig)
 }
 
 
-char*
+char**
 read_todo(FILE* file) 
 { // apparently getline isn't rly that portable, so consider other options
+    char** out_arr;
+    int out_len;
     char* lineptr;
     size_t len;
     ssize_t nread;
 
+    out_arr = NULL;
+    out_len = 0;
     lineptr = NULL;
     len = 0;
 
     while ((nread = getline(&lineptr, &len, file)) != -1) {
-        printf("Read line of size %zd\n", nread);
+        out_len++;
+        out_arr = realloc(out_arr, (sizeof(char*))*out_len); // bad to keep resizing?
+        printf("Pointer set to: %p\n", lineptr);
+        out_arr[out_len-1] = lineptr;
+
+        lineptr = NULL;
+        len = 0;
     }
 
-    return lineptr;
+    return out_arr;
 }
 
 WINDOW* 
