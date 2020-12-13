@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define MAX_TODO_LENGTH 200
-
 void winch_handler(int sig); 
 
 char** read_todo(FILE* file);

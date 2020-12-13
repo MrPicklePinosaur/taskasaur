@@ -1,11 +1,9 @@
-CPPC=g++
 CC=gcc
 
-make: main
+make: taskasaur
 
-main:
-	#$(CPPC) -lncurses main.cpp -o main
-	$(CC) -lncurses main.c -o main
+taskasaur:
+	$(CC) -lncurses taskasaur.c -o taskasaur
 
 clean:
-	rm main
+	rm taskasaur
