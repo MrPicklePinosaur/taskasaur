@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <signal.h>
 #include <unistd.h>
 #include <ncurses.h>
@@ -9,9 +10,8 @@ void winch_handler(int sig);
 
 char** read_todo(FILE* file, int* length);
 
-WINDOW* create_list_win(int height, int width, int y, int x);
-
-void draw_todo(WINDOW* todo_win, char** todo_list, int todo_length);
+WINDOW* create_win(int height, int width, int y, int x);
+MENU* create_todo_menu(char** todo_list, int todo_length);
 
 #include "config.h"
 
@@ -22,10 +22,12 @@ main(int argc, char** argv)
     FILE* board_file;
     char** todos;
     int todo_length;
+
     int height, width;
-    int x, y;
     int ch;
+
     WINDOW* todo_win;
+    MENU* todo_menu;
 
     signal(SIGWINCH, winch_handler);
 
@@ -71,47 +73,42 @@ main(int argc, char** argv)
             return 2;
     }
 
+    /* for (int i = 0; i < todo_length; i++) { */
+    /*     printf("%p\n", todos[i]); */
+    /*     printf(todos[i]); */
+    /* } */    
+    /* return 0; */
 
     // start ncurses 
     initscr();
     cbreak();
-    /* raw(); */
     noecho();
     curs_set(0);
     start_color();
-    
-    init_pair(1, COLOR_CYAN, COLOR_BLACK); 
-    init_pair(2, COLOR_BLACK, COLOR_CYAN); 
 
     getmaxyx(stdscr, height, width);
-    x = y = 0;
     refresh();
 
-    todo_win = create_list_win(20, 40, 5, 5);
-    draw_todo(todo_win, todos, todo_length);
+    /* todo_win = create_win(20, 40, 5, 5); */
+    char* test_todo[] = {"1lmao", "2pee", "3poo", "4feces"};
+    /* todo_menu = create_todo_menu(test_todo, 4); */
+    todo_menu = create_todo_menu(todos, todo_length);
+    post_menu(todo_menu);
     
-    move(y,x);
-    while ((ch = getch()) != 113) { // while not q
+    while ((ch = getch()) != 'q') {
         
-        // ofc the first thing we need is vim keys 
         switch (ch) {
-            case 104: // h
-                x -= 1;
+            case 'j':
+                menu_driver(todo_menu, REQ_DOWN_ITEM);
                 break;
-            case 106: // j
-                y += 1;
+            case 'k':
+                menu_driver(todo_menu, REQ_UP_ITEM);
                 break;
-            case 107: // k
-                y -= 1;
-                break;
-            case 108: // l
-                x += 1;
+            case 'G': // try to implement gg too
+                menu_driver(todo_menu, REQ_LAST_ITEM);
                 break;
         } 
 
-        move(y,x);
-        refresh();
-        /* clear(); */
     }
 
     endwin();
@@ -146,10 +143,12 @@ read_todo(FILE* file, int* length)
     while ((nread = getline(&lineptr, &len, file)) != -1) {
         out_len++;
         out_arr = realloc(out_arr, (sizeof(char*))*out_len); // bad to keep resizing?
+
+        lineptr[strcspn(lineptr, "\n")] = 0; // remove newline
+
         out_arr[out_len-1] = lineptr;
 
         lineptr = NULL;
-        len = 0;
     }
     
     *length = out_len;
@@ -157,18 +156,28 @@ read_todo(FILE* file, int* length)
 }
 
 WINDOW* 
-create_list_win(int height, int width, int y, int x)
+create_win(int height, int width, int y, int x)
 {
     WINDOW* new_win = newwin(height, width, y, x);
     wrefresh(new_win);
     return new_win;
 }
 
-void 
-draw_todo(WINDOW* todo_win, char** todo_list, int todo_length) {
+MENU*
+create_todo_menu(char** todo_list, int todo_length)
+{
+    MENU* todo_menu;
+    ITEM** item_list;
+    ITEM* cur_item;
+
+    item_list = malloc((todo_length+1)*sizeof(ITEM*));
     for (int i = 0; i < todo_length; i++) {
-        mvwprintw(todo_win, i+1, 2, todo_list[i]);
+        printf(todo_list[i]);
+        item_list[i] = new_item(todo_list[i], "");
     }
-    box(todo_win, 0, 0);
-    wrefresh(todo_win);
+    item_list[todo_length] = NULL; // last item needs to be a null pointer for some reason?
+
+    todo_menu = new_menu(item_list);
+
+    return todo_menu;
 }

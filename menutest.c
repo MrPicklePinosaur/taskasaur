@@ -53,11 +53,14 @@ main(int argc, char** argv)
         
         // ofc the first thing we need is vim keys 
         switch (ch) {
-            case 106: // j
+            case 'j':
                 menu_driver(todo_menu, REQ_DOWN_ITEM);
                 break;
-            case 107: // k
+            case 'k':
                 menu_driver(todo_menu, REQ_UP_ITEM);
+                break;
+            case 'G': // try to implement gg too
+                menu_driver(todo_menu, REQ_LAST_ITEM);
                 break;
         } 
 
