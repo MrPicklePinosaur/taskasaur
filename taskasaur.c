@@ -11,7 +11,9 @@ void winch_handler(int sig);
 char** read_todo(FILE* file, int* length);
 
 WINDOW* create_win(int height, int width, int y, int x);
-MENU* create_todo_menu(char** todo_list, int todo_length);
+MENU* create_todo_menu(WINDOW* win, char** todo_list, int todo_length);
+
+void free_todo(char** todo_list, int todo_length);
 
 #include "config.h"
 
@@ -87,13 +89,12 @@ main(int argc, char** argv)
     start_color();
 
     getmaxyx(stdscr, height, width);
-    refresh();
 
-    /* todo_win = create_win(20, 40, 5, 5); */
-    char* test_todo[] = {"1lmao", "2pee", "3poo", "4feces"};
-    /* todo_menu = create_todo_menu(test_todo, 4); */
-    todo_menu = create_todo_menu(todos, todo_length);
+    todo_win = create_win(20, 40, 5, 5);
+
+    todo_menu = create_todo_menu(todo_win, todos, todo_length);
     post_menu(todo_menu);
+    wrefresh(todo_win);
     
     while ((ch = getch()) != 'q') {
         
@@ -109,12 +110,14 @@ main(int argc, char** argv)
                 break;
         } 
 
+        wrefresh(todo_win);
     }
 
     endwin();
 
     /* Free mem */
-    free(todos); // prob need to free each string in list too
+    unpost(todo_menu);
+    free_todo(todos, todo_length);
 
     return 0;
 }
@@ -145,7 +148,6 @@ read_todo(FILE* file, int* length)
         out_arr = realloc(out_arr, (sizeof(char*))*out_len); // bad to keep resizing?
 
         lineptr[strcspn(lineptr, "\n")] = 0; // remove newline
-
         out_arr[out_len-1] = lineptr;
 
         lineptr = NULL;
@@ -164,20 +166,36 @@ create_win(int height, int width, int y, int x)
 }
 
 MENU*
-create_todo_menu(char** todo_list, int todo_length)
+create_todo_menu(WINDOW* win, char** todo_list, int todo_length)
 {
     MENU* todo_menu;
     ITEM** item_list;
     ITEM* cur_item;
+    int wheight, wwidth;
 
     item_list = malloc((todo_length+1)*sizeof(ITEM*));
     for (int i = 0; i < todo_length; i++) {
-        printf(todo_list[i]);
         item_list[i] = new_item(todo_list[i], "");
     }
     item_list[todo_length] = NULL; // last item needs to be a null pointer for some reason?
 
     todo_menu = new_menu(item_list);
 
+    getmaxyx(stdscr, wheight, wwidth);
+    set_menu_win(todo_menu, win);
+    set_menu_sub(todo_menu, derwin(win, wheight, wwidth, 0, 0));
+
+    box(win, 0, 0); //temp
+
     return todo_menu;
+}
+
+void
+free_todo(char** todo_list, int todo_length)
+{
+    // probably check if list is too short or too long
+    for (int i = 0; i < todo_length; i++) {
+        free(todo_list[i]); 
+    }
+    free(todo_list);
 }
