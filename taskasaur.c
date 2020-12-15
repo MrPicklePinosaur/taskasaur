@@ -94,6 +94,7 @@ main(int argc, char** argv)
 
     todo_menu = create_todo_menu(todo_win, todos, todo_length);
     post_menu(todo_menu);
+    refresh();
     wrefresh(todo_win);
     
     while ((ch = getch()) != 'q') {
@@ -109,14 +110,15 @@ main(int argc, char** argv)
                 menu_driver(todo_menu, REQ_LAST_ITEM);
                 break;
         } 
-
         wrefresh(todo_win);
+
+        /* wrefresh(todo_win); */
     }
 
     endwin();
 
     /* Free mem */
-    unpost(todo_menu);
+    unpost_menu(todo_menu);
     free_todo(todos, todo_length);
 
     return 0;
@@ -181,9 +183,10 @@ create_todo_menu(WINDOW* win, char** todo_list, int todo_length)
 
     todo_menu = new_menu(item_list);
 
-    getmaxyx(stdscr, wheight, wwidth);
+    getmaxyx(win, wheight, wwidth);
     set_menu_win(todo_menu, win);
-    set_menu_sub(todo_menu, derwin(win, wheight, wwidth, 0, 0));
+    set_menu_sub(todo_menu, derwin(win, wheight-2, wwidth-2, 1, 1));
+    set_menu_mark(todo_menu, "");
 
     box(win, 0, 0); //temp
 
