@@ -13,9 +13,14 @@ char** read_todo(FILE* file, int* length);
 WINDOW* create_win(int height, int width, int y, int x);
 MENU* create_todo_menu(WINDOW* win, char** todo_list, int todo_length);
 
+void on_select(char *item);
+
 void free_todo(char** todo_list, int todo_length);
 
 #include "config.h"
+
+#define SELECTED_COLOR 1
+#define NON_SELECTED_COLOR 2
 
 int 
 main(int argc, char** argv) 
@@ -75,44 +80,46 @@ main(int argc, char** argv)
             return 2;
     }
 
-    /* for (int i = 0; i < todo_length; i++) { */
-    /*     printf("%p\n", todos[i]); */
-    /*     printf(todos[i]); */
-    /* } */    
-    /* return 0; */
-
     // start ncurses 
     initscr();
     cbreak();
     noecho();
     curs_set(0);
+    keypad(stdscr, TRUE);
     start_color();
+
+    /* colors */
+    init_pair(SELECTED_COLOR, selected_color, COLOR_BLACK);
+    init_pair(NON_SELECTED_COLOR, non_selected_color, COLOR_BLACK);
 
     getmaxyx(stdscr, height, width);
 
     todo_win = create_win(20, 40, 5, 5);
-
     todo_menu = create_todo_menu(todo_win, todos, todo_length);
     post_menu(todo_menu);
     refresh();
     wrefresh(todo_win);
     
-    while ((ch = getch()) != 'q') {
+    while ((ch = getch()) != BINDING_QUIT) {
         
         switch (ch) {
-            case 'j':
-                menu_driver(todo_menu, REQ_DOWN_ITEM);
-                break;
-            case 'k':
+            case BINDING_SCROLL_UP:
                 menu_driver(todo_menu, REQ_UP_ITEM);
                 break;
-            case 'G': // try to implement gg too
+            case BINDING_SCROLL_DOWN:
+                menu_driver(todo_menu, REQ_DOWN_ITEM);
+                break;
+            case BINDING_JUMP_TOP:
+                menu_driver(todo_menu, REQ_FIRST_ITEM);
+                break;
+            case BINDING_JUMP_BOTTOM:
                 menu_driver(todo_menu, REQ_LAST_ITEM);
+                break;
+            case BINDING_SELECT:
                 break;
         } 
         wrefresh(todo_win);
 
-        /* wrefresh(todo_win); */
     }
 
     endwin();
@@ -178,6 +185,7 @@ create_todo_menu(WINDOW* win, char** todo_list, int todo_length)
     item_list = malloc((todo_length+1)*sizeof(ITEM*));
     for (int i = 0; i < todo_length; i++) {
         item_list[i] = new_item(todo_list[i], "");
+        set_item_userptr(item_list[i], on_select);
     }
     item_list[todo_length] = NULL; // last item needs to be a null pointer for some reason?
 
@@ -185,12 +193,21 @@ create_todo_menu(WINDOW* win, char** todo_list, int todo_length)
 
     getmaxyx(win, wheight, wwidth);
     set_menu_win(todo_menu, win);
-    set_menu_sub(todo_menu, derwin(win, wheight-2, wwidth-2, 1, 1));
+    set_menu_sub(todo_menu, derwin(win, wheight-2, wwidth-2, 1, 2));
     set_menu_mark(todo_menu, "");
+    set_menu_spacing(todo_menu, 1, 2, 1);
+    set_menu_fore(todo_menu, COLOR_PAIR(SELECTED_COLOR));
+    set_menu_back(todo_menu, COLOR_PAIR(NON_SELECTED_COLOR));
 
     box(win, 0, 0); //temp
 
     return todo_menu;
+}
+
+void
+on_select(char *item)
+{
+    printf("lol");
 }
 
 void
