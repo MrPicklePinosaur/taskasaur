@@ -17,6 +17,12 @@ void on_select(char *item);
 
 void free_todo(char** todo_list, int todo_length);
 
+struct todo_item {
+    char* name;
+    char* description;
+    char** items;
+};
+
 #include "config.h"
 
 #define SELECTED_COLOR 1
