@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <md4c.h>
 
 typedef struct TodoItem {
     char* name;
@@ -9,11 +10,28 @@ typedef struct TodoItem {
     char** items;
 } TodoItem;
 
-void parse(FILE* file, int* length);
+/* callbacks to parser */
+int enter_block(MD_BLOCKTYPE type, void* detail, void* userdata);
+int leave_block(MD_BLOCKTYPE type, void* detail, void* userdata);
+int enter_span(MD_SPANTYPE type, void* detail, void* userdata);
+int leave_span(MD_SPANTYPE type, void* detail, void* userdata);
+int text(MD_TEXTTYPE type, const MD_CHAR* text, MD_SIZE size, void* userdata);
+void debug_log(const char* msg, void* userdata);
+void syntax(void);
 
+static MD_PARSER parser = {
+    0,
+    MD_DIALECT_COMMONMARK,
+    &enter_block,
+    &leave_block,
+    &enter_span,
+    &leave_span,
+    &text,
+    &debug_log,
+    &syntax
+};
 
 static char task_md[] = "###";
-
 int
 main(int argc, char** argv)
 {
@@ -26,53 +44,46 @@ main(int argc, char** argv)
         return 1;
     }
 
-    parse(input_file, &todo_length);
-
     return 0;    
 }
 
-/* TodoItem** */ 
-void
-parse(FILE* file, int* length) 
+int
+enter_block(MD_BLOCKTYPE type, void* detail, void* userdata)
 {
-    TodoItem** out_arr;
-    int out_len;
-    char* lineptr;
-    size_t len;
-    ssize_t nread;
+    return 0;
+}
 
-    out_arr = NULL;
-    out_len = 0;
-    lineptr = NULL;
-    len = 0;
+int
+leave_block(MD_BLOCKTYPE type, void* detail, void* userdata)
+{
+    return 0;
+}
 
-    while ((nread = getline(&lineptr, &len, file)) != -1) {
+int
+enter_span(MD_SPANTYPE type, void* detail, void* userdata)
+{
+    return 0;
+}
 
-        lineptr[strcspn(lineptr, "\n")] = 0; // remove newline
-        
-        if (strcmp(lineptr, "") == 0) {
-            printf("found empty line\n");
-            lineptr = NULL;
-            continue;
-        } 
+int
+leave_span(MD_SPANTYPE type, void* detail, void* userdata)
+{
+    return 0;
+}
 
-        // found a task
-        if (strlen(lineptr) > 3 && strncmp(lineptr, task_md, 3) == 0) {
-            printf("found_task\n");
-            lineptr = NULL;
-            continue;
-        }
+int
+text(MD_TEXTTYPE type, const MD_CHAR* text, MD_SIZE size, void* userdata){
+    return 0;
+}
 
+void
+debug_log(const char* msg, void* userdata)
+{
+    return;
+}
 
-        
-
-        /* out_arr = realloc(out_arr, (sizeof(char*))*out_len); // bad to keep resizing? */
-
-        /* out_arr[out_len-1] = lineptr; */
-
-        lineptr = NULL;
-    }
-    
-    *length = out_len;
-    /* return out_arr; */
+void 
+syntax(void)
+{
+    return;
 }

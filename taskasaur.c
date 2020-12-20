@@ -6,6 +6,15 @@
 #include <ncurses.h>
 #include <menu.h>
 
+#define SELECTED_COLOR 1
+#define NON_SELECTED_COLOR 2
+
+struct todo_item {
+    char* name;
+    char* description;
+    char** items;
+};
+
 void winch_handler(int sig); 
 
 char** read_todo(FILE* file, int* length);
@@ -17,16 +26,7 @@ void on_select(char *item);
 
 void free_todo(char** todo_list, int todo_length);
 
-struct todo_item {
-    char* name;
-    char* description;
-    char** items;
-};
-
 #include "config.h"
-
-#define SELECTED_COLOR 1
-#define NON_SELECTED_COLOR 2
 
 int 
 main(int argc, char** argv) 
