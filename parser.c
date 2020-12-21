@@ -36,12 +36,12 @@ const MD_PARSER parser = {
 int
 main(int argc, char** argv)
 {
-    char* input_buffer;
+    const char* input_buffer;
     long input_size;
 
     input_buffer = read_file("test_board.md", &input_size);
 
-    md_parse(input_buffer, input_size, &parser, NULL);
+    int out = md_parse(input_buffer, input_size, &parser, NULL);
 
     return 0;    
 }
@@ -84,6 +84,13 @@ read_file(char* file_name, long* size)
 int
 enter_block(MD_BLOCKTYPE type, void* detail, void* userdata)
 {
+    switch (type) {
+        case MD_BLOCK_H:
+            printf("Found h%d block\n", ((MD_BLOCK_H_DETAIL*)detail)->level);
+            break;
+
+        // no need for default case for now :>
+    }
     return 0;
 }
 
@@ -113,6 +120,7 @@ text(MD_TEXTTYPE type, const MD_CHAR* text, MD_SIZE size, void* userdata){
 void
 debug_log(const char* msg, void* userdata)
 {
+    printf(msg);
     return;
 }
 
