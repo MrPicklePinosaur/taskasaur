@@ -7,5 +7,7 @@ main(int argc, char** argv)
 
     board = begin_parse("test_board.md");
 
+    printf("%d\n", board->todolist_count);
+
     return 0;    
 }

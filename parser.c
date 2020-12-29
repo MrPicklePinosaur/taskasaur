@@ -12,11 +12,15 @@ typedef struct State {
 char* read_file(char* file_name, long* size);
 
 /* processing */
-void enter_todolist();
-void exit_todolist();
+void enter_todolist(State* state, char* list_name);
+void exit_todolist(State* state);
 
-void enter_todoitem();
-void exit_todoitem();
+void enter_todoitem(State* state, char* item_name);
+void exit_todoitem(State* state);
+
+void set_description(State* state, char* description);
+void set_due(State* state, char* due); // make an acc date struct later
+void add_subtask(State* state, char* subtask_name, SubTaskState subtask_state);
 
 /* callbacks to parser */
 int enter_block(MD_BLOCKTYPE type, void* detail, void* userdata);
@@ -29,7 +33,7 @@ void syntax(void);
 
 const MD_PARSER parser = {
     0,
-    MD_DIALECT_COMMONMARK,
+    MD_FLAG_TASKLISTS,
     &enter_block,
     &leave_block,
     &enter_span,
@@ -80,6 +84,7 @@ begin_parse(char* board_path)
     const char* input_buffer;
     long input_size;
     State* state;
+    Board* new_board;
 
     /* read entire file */
     input_buffer = read_file(board_path, &input_size);
@@ -89,15 +94,86 @@ begin_parse(char* board_path)
     state->cur_todolist = NULL;
     state->cur_todoitem = NULL;
 
-    state->board = malloc(sizeof(Board));
-    state->board->todolist_list = malloc(0);
-    state->board->todolist_count = 0;
+    new_board = malloc(sizeof(Board));
+    new_board->todolist_list = malloc(0);
+    new_board->todolist_count = 0;
+    state->board = new_board;
 
     md_parse(input_buffer, input_size, &parser, state);
+
+    /* finish calls */
+    exit_todolist(state);
 
     free((char*)input_buffer);
 
     return state->board;
+}
+
+void
+enter_todolist(State* state, char* list_name)
+{
+    TodoList* new_todolist;
+    
+    new_todolist = malloc(sizeof(TodoList));
+    new_todolist->list_name = list_name;
+    new_todolist->item_list = malloc(0);
+    new_todolist->item_count = 0;
+
+    state->cur_todolist = new_todolist;
+}
+
+void
+exit_todolist(State* state)
+{
+    Board* board;
+    TodoList** todolist_list;
+
+    if (state->cur_todolist == NULL) { 
+        return;
+    }
+
+    /* append new todolist to board */
+    board = state->board;
+    todolist_list = board->todolist_list;
+
+    board->todolist_count += 1;
+    todolist_list = realloc(todolist_list, board->todolist_count*sizeof(TodoList*));
+    todolist_list[board->todolist_count-1] = state->cur_todolist;
+    state->cur_todolist = NULL;
+
+    /* save */
+    board->todolist_list = todolist_list;
+
+}
+
+void
+enter_todoitem(State* state, char* item_name)
+{
+
+}
+
+void
+exit_todoitem(State* state)
+{
+
+}
+
+void
+set_description(State* state, char* description)
+{
+
+}
+
+void
+set_due(State* state, char* due)
+{
+
+}
+
+void
+add_subtask(State* state, char* subtask_name, SubTaskState subtask_state)
+{
+
 }
 
 int
@@ -122,6 +198,8 @@ leave_block(MD_BLOCKTYPE type, void* detail, void* userdata)
                     printf("leave h1, %s\n", state->last_block_text);
                 
                 case 2:
+                    exit_todolist(state);
+                    enter_todolist(state, state->last_block_text);
                     printf("leave h2, %s\n", state->last_block_text);
                     break;
                 case 3:
@@ -132,6 +210,14 @@ leave_block(MD_BLOCKTYPE type, void* detail, void* userdata)
 
             break;
 
+        case MD_BLOCK_QUOTE:
+            printf("blockquote, %s\n", state->last_block_text);
+            break;
+
+        case MD_BLOCK_LI:
+            printf("todo, %s\n", state->last_block_text);
+            break;
+
         // no need for default case for now :>
     }
     return 0;
@@ -140,12 +226,22 @@ leave_block(MD_BLOCKTYPE type, void* detail, void* userdata)
 int
 enter_span(MD_SPANTYPE type, void* detail, void* userdata)
 {
+
+
     return 0;
 }
 
 int
 leave_span(MD_SPANTYPE type, void* detail, void* userdata)
 {
+    State* state;
+    state = (State*)userdata;
+    
+    switch (type) {
+        case MD_SPAN_STRONG:
+            printf("date, %s\n", state->last_block_text);
+            break;
+    }
     return 0;
 }
 

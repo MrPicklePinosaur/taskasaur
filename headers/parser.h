@@ -4,28 +4,33 @@
 #include <string.h>
 #include <md4c.h>
 
+typedef enum SubTaskState {
+    SubTaskState_todo,
+    SubTaskState_done
+} SubTaskState;
+
 typedef struct SubTask {
     char* subtask_name;
-    int done;
+    SubTaskState done;
 } SubTask;
 
 typedef struct TodoItem {
     char* item_name;
     char* description;
     char* due;
-    SubTask* subtask_list;
+    SubTask** subtask_list;
     int subtask_count;
 } TodoItem;
 
 typedef struct TodoList {
     char* list_name;
-    TodoItem* item_list;
+    TodoItem** item_list;
     int item_count;
 } TodoList;
 
 typedef struct Board {
     char* board_name;
-    TodoList* todolist_list;
+    TodoList** todolist_list;
     int todolist_count;
 } Board;
 
