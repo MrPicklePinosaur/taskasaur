@@ -1,12 +1,12 @@
 CC=gcc
 
-make: taskasaur test
+make: taskasaur
 
-taskasaur: taskasur.c
-	$(CC) -lncurses -lmenu taskasaur.c -o taskasaur
+parser.o: parser.c headers/parser.h
+	$(CC) -c parser.c
 
-test: parser.c
-	$(CC) -lncurses -lmenu -lmd4c parser.c -o parser
+taskasaur: taskasaur.c parser.o
+	$(CC) -o $@ $^ -lncurses -lmenu -lmd4c
 
 clean:
-	rm taskasaur parser
+	rm taskasaur *.o
