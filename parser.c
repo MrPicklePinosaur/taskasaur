@@ -132,6 +132,8 @@ exit_todolist(State* state)
         return;
     }
 
+    exit_todoitem(state);
+
     /* append new todolist to board */
     board = state->board;
     todolist_list = board->todolist_list;
@@ -149,19 +151,47 @@ exit_todolist(State* state)
 void
 enter_todoitem(State* state, char* item_name)
 {
+    TodoItem* new_todoitem;
 
+    new_todoitem = malloc(sizeof(TodoItem));
+    new_todoitem->item_name = item_name;
+    new_todoitem->description = NULL;
+    new_todoitem->due = NULL;
+    new_todoitem->subtask_list = malloc(0);
+    new_todoitem->subtask_count = 0;
+
+    state->cur_todoitem = new_todoitem;
+    
 }
 
 void
 exit_todoitem(State* state)
 {
+    TodoList* todolist;
+    TodoItem** item_list;
+
+    if (state->cur_todoitem == NULL) {
+        return;
+    }
+    
+    /* append current item to todo list */
+    todolist = state->cur_todolist;
+    item_list = todolist->item_list;
+
+    todolist->item_count += 1;
+    item_list = realloc(item_list, todolist->item_count*sizeof(TodoItem*));
+    item_list[todolist->item_count-1] = state->cur_todoitem;
+    state->cur_todoitem = NULL;
+
+    /* save */
+    todolist->item_list = item_list;
 
 }
 
 void
 set_description(State* state, char* description)
 {
-
+    state->cur_todoitem->description = description;
 }
 
 void
@@ -173,6 +203,22 @@ set_due(State* state, char* due)
 void
 add_subtask(State* state, char* subtask_name, SubTaskState subtask_state)
 {
+    SubTask* new_subtask;
+    SubTask** subtask_list;
+    
+    /* create new subtask */
+    new_subtask = malloc(sizeof(SubTask));
+    new_subtask->subtask_name = subtask_name;
+    new_subtask->done = subtask_state;
+
+    /* add it */
+    subtask_list = state->cur_todoitem->subtask_list;
+
+    state->cur_todoitem->subtask_count += 1;
+    subtask_list = realloc(subtask_list, state->cur_todoitem->subtask_count*sizeof(SubTask*));
+    subtask_list[state->cur_todoitem->subtask_count-1] = new_subtask;
+
+    state->cur_todoitem->subtask_list = subtask_list;
 
 }
 
@@ -190,32 +236,44 @@ leave_block(MD_BLOCKTYPE type, void* detail, void* userdata)
 
     switch (type) {
 
-        case MD_BLOCK_H:
+        case MD_BLOCK_H:;
 
-            switch(((MD_BLOCK_H_DETAIL*)detail)->level) {
+            MD_BLOCK_H_DETAIL* h_detail;
+            h_detail = ((MD_BLOCK_H_DETAIL*)detail);
+
+            switch(h_detail->level) {
 
                 case 1:
-                    printf("leave h1, %s\n", state->last_block_text);
-                
+                    break;
+
                 case 2:
                     exit_todolist(state);
                     enter_todolist(state, state->last_block_text);
-                    printf("leave h2, %s\n", state->last_block_text);
-                    break;
-                case 3:
-                    printf("leave h3, %s\n", state->last_block_text);
                     break;
 
+                case 3:
+                    exit_todoitem(state);
+                    enter_todoitem(state, state->last_block_text);
+                    break;
             }
 
             break;
 
         case MD_BLOCK_QUOTE:
-            printf("blockquote, %s\n", state->last_block_text);
+            set_description(state, state->last_block_text);
             break;
 
-        case MD_BLOCK_LI:
-            printf("todo, %s\n", state->last_block_text);
+        case MD_BLOCK_LI:;
+            MD_BLOCK_LI_DETAIL* li_detail;
+            SubTaskState done;
+
+            li_detail = ((MD_BLOCK_LI_DETAIL*)detail);
+
+            assert(li_detail->is_task != 0); // all lists should be task lists
+
+            done = li_detail->task_mark == ' ' ? SubTaskState_todo : SubTaskState_done;
+
+            add_subtask(state, state->last_block_text, done);
             break;
 
         // no need for default case for now :>
