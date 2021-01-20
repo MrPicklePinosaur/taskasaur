@@ -37,3 +37,5 @@ typedef struct Board {
 
 extern Board* begin_parse(char* board_path);
 
+extern void log_todo(Board* board);
+

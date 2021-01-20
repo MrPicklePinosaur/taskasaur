@@ -43,6 +43,66 @@ const MD_PARSER parser = {
     &syntax
 };
 
+
+void
+log_todo(Board* board)
+{
+    for (int i = 0; i < board->todolist_count; i++) {
+        TodoList* todolist;
+        printf("List =-=-=-=-=-==-=-=-=-=-=-\n");
+        todolist = board->todolist_list[i];
+        printf("List name: %s\n", todolist->list_name);
+        printf("Num of items: %d\n", todolist->item_count);
+
+        for (int j = 0; j < todolist->item_count; j++) {
+            TodoItem* todoitem;
+            printf("Item =-=-=-=-=-\n");
+            todoitem = todolist->item_list[j];
+            printf("Item name: %s\n", todoitem->item_name);
+            printf("Description: %s\n", todoitem->description);
+            printf("Num of subtasks: %d\n", todoitem->subtask_count);
+
+            for (int k = 0; k < todoitem->subtask_count; k++) {
+                SubTask* subtask;
+                int done;
+
+                subtask = todoitem->subtask_list[k];
+                printf("Subtask: %s, %d\n", subtask->subtask_name, subtask->done);
+            }
+        }
+    }
+}
+
+Board*
+begin_parse(char* board_path)
+{
+    const char* input_buffer;
+    long input_size;
+    State state;
+    Board* new_board;
+
+    /* read entire file */
+    input_buffer = read_file(board_path, &input_size);
+
+    /* setup state */
+    state.cur_todolist = NULL;
+    state.cur_todoitem = NULL;
+
+    new_board = malloc(sizeof(Board));
+    new_board->todolist_list = malloc(0);
+    new_board->todolist_count = 0;
+    state.board = new_board;
+
+    md_parse(input_buffer, input_size, &parser, &state);
+
+    /* finish calls */
+    exit_todolist(&state);
+
+    free((char*)input_buffer);
+
+    return state.board;
+}
+
 char*
 read_file(char* file_name, long* size) 
 { // apparently using seek isnt the greatest, may change to chunk reading later
@@ -76,36 +136,6 @@ read_file(char* file_name, long* size)
     /* return */
     *size = fsize;
     return output;
-}
-
-Board*
-begin_parse(char* board_path)
-{
-    const char* input_buffer;
-    long input_size;
-    State state;
-    Board* new_board;
-
-    /* read entire file */
-    input_buffer = read_file(board_path, &input_size);
-
-    /* setup state */
-    state.cur_todolist = NULL;
-    state.cur_todoitem = NULL;
-
-    new_board = malloc(sizeof(Board));
-    new_board->todolist_list = malloc(0);
-    new_board->todolist_count = 0;
-    state.board = new_board;
-
-    md_parse(input_buffer, input_size, &parser, &state);
-
-    /* finish calls */
-    exit_todolist(&state);
-
-    free((char*)input_buffer);
-
-    return state.board;
 }
 
 void
