@@ -83,30 +83,29 @@ begin_parse(char* board_path)
 {
     const char* input_buffer;
     long input_size;
-    State* state;
+    State state;
     Board* new_board;
 
     /* read entire file */
     input_buffer = read_file(board_path, &input_size);
 
     /* setup state */
-    state = malloc(sizeof(State));
-    state->cur_todolist = NULL;
-    state->cur_todoitem = NULL;
+    state.cur_todolist = NULL;
+    state.cur_todoitem = NULL;
 
     new_board = malloc(sizeof(Board));
     new_board->todolist_list = malloc(0);
     new_board->todolist_count = 0;
-    state->board = new_board;
+    state.board = new_board;
 
-    md_parse(input_buffer, input_size, &parser, state);
+    md_parse(input_buffer, input_size, &parser, &state);
 
     /* finish calls */
-    exit_todolist(state);
+    exit_todolist(&state);
 
     free((char*)input_buffer);
 
-    return state->board;
+    return state.board;
 }
 
 void
@@ -125,26 +124,16 @@ enter_todolist(State* state, char* list_name)
 void
 exit_todolist(State* state)
 {
-    Board* board;
-    TodoList** todolist_list;
+    #define sb state->board
 
-    if (state->cur_todolist == NULL) { 
-        return;
-    }
+    if (state->cur_todolist == NULL) return; 
 
     exit_todoitem(state);
 
-    /* append new todolist to board */
-    board = state->board;
-    todolist_list = board->todolist_list;
-
-    board->todolist_count += 1;
-    todolist_list = realloc(todolist_list, board->todolist_count*sizeof(TodoList*));
-    todolist_list[board->todolist_count-1] = state->cur_todolist;
+    sb->todolist_count += 1;
+    sb->todolist_list = realloc(sb->todolist_list, sb->todolist_count*sizeof(TodoList*));
+    sb->todolist_list[sb->todolist_count-1] = state->cur_todolist;
     state->cur_todolist = NULL;
-
-    /* save */
-    board->todolist_list = todolist_list;
 
 }
 
@@ -167,24 +156,21 @@ enter_todoitem(State* state, char* item_name)
 void
 exit_todoitem(State* state)
 {
+    #define st state->cur_todolist
+
     TodoList* todolist;
     TodoItem** item_list;
 
-    if (state->cur_todoitem == NULL) {
-        return;
-    }
+    if (state->cur_todoitem == NULL) return; 
     
     /* append current item to todo list */
     todolist = state->cur_todolist;
     item_list = todolist->item_list;
 
-    todolist->item_count += 1;
-    item_list = realloc(item_list, todolist->item_count*sizeof(TodoItem*));
-    item_list[todolist->item_count-1] = state->cur_todoitem;
+    st->item_count += 1;
+    st->item_list = realloc(st->item_list, st->item_count*sizeof(TodoItem*));
+    st->item_list[st->item_count-1] = state->cur_todoitem;
     state->cur_todoitem = NULL;
-
-    /* save */
-    todolist->item_list = item_list;
 
 }
 

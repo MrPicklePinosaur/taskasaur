@@ -35,6 +35,5 @@ typedef struct Board {
     int todolist_count;
 } Board;
 
-
 extern Board* begin_parse(char* board_path);
 
