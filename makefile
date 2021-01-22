@@ -8,8 +8,11 @@ parser.o: parser.c headers/parser.h
 render.o: render.c headers/render.h
 	$(CC) -c render.c
 
-taskasaur: taskasaur.c parser.o render.o
-	$(CC) -o $@ $^ -lncurses -lmenu -lmd4c
+menu.o: menu.c headers/menu.h
+	$(CC) -c menu.c
+
+taskasaur: taskasaur.c parser.o render.o menu.o
+	$(CC) -o $@ $^ -lncurses -lmd4c
 
 clean:
 	rm taskasaur *.o
