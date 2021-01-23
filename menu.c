@@ -15,27 +15,51 @@ typedef struct Menu {
     int menu_length;
     int selected_item;
     WINDOW* menu_win;
+    int max_height;
+    int max_width;
 } Menu;
 
 int render_menu(Menu* menu);
 
+MenuItem*
+create_menuitem(char* contents)
+{
+    MenuItem* new_menuitem;
+
+    new_menuitem = malloc(sizeof(MenuItem));
+    new_menuitem->contents = contents;
+
+    return new_menuitem;
+}
+
 Menu* 
 create_menu(MenuItem** item_list)
 {
-    Menu *new_menu;
+    Menu* new_menu;
 
     new_menu = malloc(sizeof(Menu));
-    new_menu->menu_items = item_list;
-    new_menu->menu_length = array_length(MenuItem*, item_list);
+    set_menu_items(new_menu, item_list);
     new_menu->selected_item = 0;
-    WINDOW* menu_win = NULL;
+    set_menu_win(new_menu, stdscr);
 
-    return NULL;
+    return new_menu;
 }
 
 int
 set_menu_items(Menu* menu, MenuItem** item_list)
 {
+    menu->menu_items = item_list;
+    menu->menu_length = array_length(MenuItem*, item_list);
+
+    return 0;
+}
+
+int
+set_menu_win(Menu* menu, WINDOW* win)
+{
+    menu->menu_win = win;
+    getmaxyx(menu->menu_win, menu->max_height, menu->max_width);
+
     return 0;
 }
 
@@ -51,6 +75,8 @@ render_menu(Menu* menu)
 
     for (int i = 0; i < menu->menu_length; i++) {
         
+        /* wrap text by inserting newlines */
+
         /* color selected item */
 
     }
@@ -58,4 +84,9 @@ render_menu(Menu* menu)
     return 0;
 }
 
+int
+free_menu(Menu* menu)
+{
+    return 0;
+}
 
