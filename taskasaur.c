@@ -1,6 +1,8 @@
 
 #include "headers/parser.h"
 #include "headers/render.h"
+#include "headers/menu.h"
+#include "headers/utils.h"
 
 int
 main(int argc, char** argv)
@@ -15,6 +17,7 @@ main(int argc, char** argv)
     getch();
 
     exit_tscurses();
+    
 
     return 0;    
 }

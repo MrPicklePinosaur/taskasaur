@@ -2,6 +2,8 @@ CC=gcc
 
 make: taskasaur
 
+all: taskasaur
+
 parser.o: parser.c headers/parser.h
 	$(CC) -c parser.c
 
@@ -11,7 +13,10 @@ render.o: render.c headers/render.h
 menu.o: menu.c headers/menu.h
 	$(CC) -c menu.c
 
-taskasaur: taskasaur.c parser.o render.o menu.o
+utils.o: utils.c headers/utils.h
+	$(CC) -c utils.c
+
+taskasaur: taskasaur.c parser.o render.o menu.o utils.o
 	$(CC) -o $@ $^ -lncurses -lmd4c
 
 clean:

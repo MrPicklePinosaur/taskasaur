@@ -1,4 +1,7 @@
 
+#ifndef __RENDER_H__
+#define __RENDER_H__
+
 #include <ncurses.h>
 
 enum TaskasaurColors {
@@ -10,3 +13,4 @@ enum TaskasaurColors {
 extern int init_tscurses(void);
 extern int exit_tscurses(void);
 
+#endif
