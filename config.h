@@ -1,4 +1,9 @@
 
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
+
+#include <ncurses.h>
+
 static char font[] = "Source Code Pro:size=12";
 
 
@@ -26,3 +31,4 @@ static int non_selected_color = COLOR_WHITE;
 #define BINDING_JUMP_BOTTOM 'G'
 #define BINDING_SELECT '\n'
 
+#endif

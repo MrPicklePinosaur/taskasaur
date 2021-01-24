@@ -39,7 +39,6 @@ wrap_text(char* str, int max_width, int* lines)
 
         str_read += max_width;
         line_count += 1;
-
     }
 
     *lines = line_count;

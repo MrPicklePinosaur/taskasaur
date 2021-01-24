@@ -5,7 +5,7 @@
 #include <ncurses.h>
 
 enum TaskasaurColors {
-    TS_SELECTED,
+    TS_SELECTED = 1,
     TS_NONSELECTED
 };
 

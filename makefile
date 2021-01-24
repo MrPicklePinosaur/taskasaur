@@ -16,6 +16,8 @@ menu.o: menu.c headers/menu.h
 utils.o: utils.c headers/utils.h
 	$(CC) -c utils.c
 
+# include config.h as depend
+
 taskasaur: taskasaur.c parser.o render.o menu.o utils.o
 	$(CC) -o $@ $^ -lncurses -lmd4c
 

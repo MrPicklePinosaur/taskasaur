@@ -4,6 +4,7 @@
 #include <ncurses.h>
 
 #include "headers/menu.h"
+#include "headers/render.h"
 #include "headers/utils.h"
 
 typedef struct MenuItem {
@@ -77,13 +78,24 @@ render_menu(Menu* menu)
     cur_line = 0;
 
     for (int i = 0; i < menu->menu_length; i++) {
+
+        int wrapped_lines;
+        char* wrapped_text;
+        int text_color;
         
         /* wrap text by inserting newlines */
-        mvwprintw(menu->menu_win, cur_line, 0, menu->menu_items[i]->contents);
+        wrapped_text = wrap_text(menu->menu_items[i]->contents, menu->max_width, &wrapped_lines);        
 
         /* color selected item */
+        text_color = (i == menu->selected_item) ? TS_SELECTED : TS_NONSELECTED;
 
-        cur_line += 1;
+        wattron(menu->menu_win, COLOR_PAIR(text_color));
+        mvwprintw(menu->menu_win, cur_line, 0, wrapped_text);
+        wattroff(menu->menu_win, COLOR_PAIR(text_color));
+
+        cur_line += wrapped_lines;
+
+        free(wrapped_text);
 
     }
 

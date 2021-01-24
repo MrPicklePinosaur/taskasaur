@@ -17,9 +17,8 @@ main(int argc, char** argv)
 
     MenuItem** item_list = malloc(4*sizeof(MenuItem*));   
     for (int i = 0; i < 3; i++) {
-        item_list[i] = create_menuitem("lmao");
+        item_list[i] = create_menuitem("Many of you are probably feeling a little sad."); 
     }
-    item_list[3] = 0;
 
     Menu* menu = create_menu(item_list);
 
