@@ -72,12 +72,18 @@ get_menu_items(Menu* menu)
 int
 render_menu(Menu* menu)
 {
+    int cur_line;
+
+    cur_line = 0;
 
     for (int i = 0; i < menu->menu_length; i++) {
         
         /* wrap text by inserting newlines */
+        mvwprintw(menu->menu_win, cur_line, 0, menu->menu_items[i]->contents);
 
         /* color selected item */
+
+        cur_line += 1;
 
     }
 

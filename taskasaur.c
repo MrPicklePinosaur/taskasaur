@@ -14,7 +14,6 @@ main(int argc, char** argv)
     /* init curses */
     init_tscurses();
 
-    getch();
 
     MenuItem** item_list = malloc(4*sizeof(MenuItem*));   
     for (int i = 0; i < 3; i++) {
@@ -24,7 +23,16 @@ main(int argc, char** argv)
 
     Menu* menu = create_menu(item_list);
 
+    render_menu(menu);
+
+    getch();
+
     exit_tscurses();
+
+    /* int out; */
+    /* printf("%s", wrap_text("ayylmaooooxdxdxdxdxd", 3, &out)); */
+    /* printf("%d\n", out); */
+    /* wrap_text("ayylmaooooxdxdxdxdxd", 3, &out); */
     
 
     return 0;    

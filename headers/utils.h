@@ -18,4 +18,8 @@ array_length(type, array)               \
     m_len;                              \
 })
 
+extern int min(int a, int b);
+
+extern char* wrap_text(char* str, int max_width, int* lines);
+
 #endif
