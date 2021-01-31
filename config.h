@@ -6,7 +6,6 @@
 
 static char font[] = "Source Code Pro:size=12";
 
-
 /* COLORS */
 
 /* Use the ncurses defined colors, here's a list of them:
@@ -29,6 +28,9 @@ static int non_selected_color = COLOR_WHITE;
 #define BINDING_SCROLL_DOWN 'j'
 #define BINDING_JUMP_TOP 'g'
 #define BINDING_JUMP_BOTTOM 'G'
+#define BINDING_MOVE_ITEM_UP 'K'
+#define BINDING_MOVE_ITEM_DOWN 'J'
+#define BINDING_DELETE_ITEM 'D'
 #define BINDING_SELECT '\n'
 
 #endif

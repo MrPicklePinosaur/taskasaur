@@ -16,11 +16,12 @@ main(int argc, char** argv)
     /* init curses */
     init_tscurses();
 
-    MenuItem** item_list = malloc(6*sizeof(MenuItem*));   
-    for (int i = 0; i < 5; i++) {
-        item_list[i] = create_menuitem("Many of you are probably feeling a little sad."); 
-    }
-    item_list[5] = 0;
+    MenuItem** item_list = malloc(5*sizeof(MenuItem*));   
+    item_list[0] = create_menuitem("Many of you are probably feeling a little sad."); 
+    item_list[1] = create_menuitem("This is ok. Sadness is a normal human emotion."); 
+    item_list[2] = create_menuitem("I encourage you to watch the movie Inside Out"); 
+    item_list[3] = create_menuitem("one of the best movies of all time."); 
+    item_list[4] = 0;
 
     Menu* menu = create_menu(item_list);
     render_menu(menu);
@@ -41,6 +42,16 @@ main(int argc, char** argv)
             case BINDING_JUMP_BOTTOM:
                 menu_driver(menu, MENU_BOTTOM);
                 break;
+            case BINDING_MOVE_ITEM_UP:
+                menu_driver(menu, MENU_MOVE_UP);
+                break;
+            case BINDING_MOVE_ITEM_DOWN:
+                menu_driver(menu, MENU_MOVE_DOWN);
+                break;
+            case BINDING_DELETE_ITEM:
+                menu_driver(menu, MENU_DELETE);
+                break;
+
         }
         render_menu(menu);
 

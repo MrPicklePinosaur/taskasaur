@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 #include <ncurses.h>
 
 #include "headers/menu.h"
@@ -20,7 +21,8 @@ typedef struct Menu {
     int max_width;
 } Menu;
 
-int render_menu(Menu* menu);
+int swap_item(Menu* menu, int src_index, int dest_index);
+int delete_item(Menu* menu, int index);
 
 MenuItem*
 create_menuitem(char* contents)
@@ -39,20 +41,12 @@ create_menu(MenuItem** item_list)
     Menu* new_menu;
 
     new_menu = malloc(sizeof(Menu));
-    set_menu_items(new_menu, item_list);
+    new_menu->menu_items = item_list;
+    new_menu->menu_length = array_length(MenuItem*, item_list);
     new_menu->selected_item = 0;
     set_menu_win(new_menu, stdscr);
 
     return new_menu;
-}
-
-int
-set_menu_items(Menu* menu, MenuItem** item_list)
-{
-    menu->menu_items = item_list;
-    menu->menu_length = array_length(MenuItem*, item_list);
-
-    return 0;
 }
 
 int
@@ -71,6 +65,43 @@ get_menu_items(Menu* menu)
 }
 
 int
+swap_item(Menu* menu, int src_index, int dest_index)
+{
+    MenuItem* temp;
+
+    temp = menu->menu_items[dest_index];
+    menu->menu_items[dest_index] = menu->menu_items[src_index];
+    menu->menu_items[src_index] = temp;
+
+    return 0;
+}
+
+int
+delete_item(Menu* menu, int index)
+{
+    if (index < 0 || index > menu->menu_length-1) return -1;
+
+    int temp_size = (menu->menu_length-index-1)*sizeof(MenuItem*);
+    MenuItem* temp[temp_size];
+
+    /* might break if last item? */
+    memcpy(temp, menu->menu_items[index+1], temp_size);
+    memcpy(menu->menu_items[index], temp, temp_size);
+
+    menu->menu_items = realloc(menu->menu_items, menu->menu_length*sizeof(MenuItem*)); 
+    menu->menu_items[menu->menu_length-1] = 0; // preserve null at end
+
+    menu->menu_length -= 1;
+
+    /* also move the current selected position if it's last */
+    if (menu->selected_item > menu->menu_length-1) {
+        menu->selected_item = menu->menu_length-1;
+    }
+
+    return 0;
+}
+
+int
 menu_driver(Menu* menu, MenuAction action)
 {
 
@@ -78,16 +109,37 @@ menu_driver(Menu* menu, MenuAction action)
         case MENU_UP:
             menu->selected_item = menu->selected_item-1 >= 0 ? menu->selected_item-1 : 0;
             break;
+
         case MENU_DOWN:
             menu->selected_item = menu->selected_item+1 <= menu->menu_length-1 ? menu->selected_item+1 : menu->menu_length-1;
             break;
+
         case MENU_TOP:
             menu->selected_item = 0;
             break;
+
         case MENU_BOTTOM:
             menu->selected_item = menu->menu_length-1;
             break;
-        default:
+
+        case MENU_MOVE_UP:
+            if (menu->selected_item <= 0) break;
+            swap_item(menu, menu->selected_item, menu->selected_item-1);
+            menu->selected_item -= 1;
+            break;
+
+        case MENU_MOVE_DOWN:
+            if (menu->selected_item >= menu->menu_length-1) break;
+            swap_item(menu, menu->selected_item, menu->selected_item+1);
+            menu->selected_item += 1;
+            break;
+
+        case MENU_DELETE:
+            delete_item(menu, menu->selected_item);
+            wclear(menu->menu_win);
+            break;
+
+        default: // This is here for debug, disable later
             fprintf(stderr, "Invalid menu action");
     }
 
