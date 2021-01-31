@@ -71,6 +71,30 @@ get_menu_items(Menu* menu)
 }
 
 int
+menu_driver(Menu* menu, MenuAction action)
+{
+
+    switch (action) {
+        case MENU_UP:
+            menu->selected_item = menu->selected_item-1 >= 0 ? menu->selected_item-1 : 0;
+            break;
+        case MENU_DOWN:
+            menu->selected_item = menu->selected_item+1 <= menu->menu_length-1 ? menu->selected_item+1 : menu->menu_length-1;
+            break;
+        case MENU_TOP:
+            menu->selected_item = 0;
+            break;
+        case MENU_BOTTOM:
+            menu->selected_item = menu->menu_length-1;
+            break;
+        default:
+            fprintf(stderr, "Invalid menu action");
+    }
+
+    return 0;
+}
+
+int
 render_menu(Menu* menu)
 {
     int cur_line;
