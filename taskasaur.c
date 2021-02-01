@@ -24,6 +24,12 @@ main(int argc, char** argv)
     item_list[4] = 0;
 
     Menu* menu = create_menu(item_list);
+    WINDOW* win = newwin(20, 40, 5, 5);
+    set_menu_win(menu, win);
+    box(win, 0, 0);
+    refresh();
+    wrefresh(win);
+
     render_menu(menu);
 
     while ((ch = getch()) != BINDING_QUIT) {

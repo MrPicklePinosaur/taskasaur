@@ -8,6 +8,11 @@
 #include "headers/render.h"
 #include "headers/utils.h"
 
+#define MENU_PAD_TOP 2
+#define MENU_PAD_BOTTOM 1
+#define MENU_PAD_LEFT 2
+#define MENU_PAD_RIGHT 1
+
 typedef struct MenuItem {
     char* contents;
 } MenuItem;
@@ -17,6 +22,7 @@ typedef struct Menu {
     int menu_length;
     int selected_item;
     WINDOW* menu_win;
+    WINDOW* sub_win;
     int max_height;
     int max_width;
 } Menu;
@@ -52,8 +58,21 @@ create_menu(MenuItem** item_list)
 int
 set_menu_win(Menu* menu, WINDOW* win)
 {
+    int height, width;
+
     menu->menu_win = win;
-    getmaxyx(menu->menu_win, menu->max_height, menu->max_width);
+    getmaxyx(menu->menu_win, height, width);
+
+    /* create a subwin (also prob free old subwin?) */
+    menu->max_height = height-MENU_PAD_TOP-MENU_PAD_BOTTOM;
+    menu->max_width = width-MENU_PAD_LEFT-MENU_PAD_RIGHT;
+    menu->sub_win = derwin(
+            menu->menu_win, 
+            menu->max_height,
+            menu->max_width,
+            MENU_PAD_TOP, 
+            MENU_PAD_LEFT
+    );
 
     return 0;
 }
@@ -149,31 +168,35 @@ menu_driver(Menu* menu, MenuAction action)
 int
 render_menu(Menu* menu)
 {
-    int cur_line;
+    /* draw outer menu (prob dont need this every render) */ 
+    mvwprintw(menu->menu_win, 0, MENU_PAD_LEFT, "TODO");
 
-    cur_line = 0;
-
+    /* draw inner menu */
+    int cur_line = 0;
     for (int i = 0; i < menu->menu_length; i++) {
 
         int wrapped_lines;
         char* wrapped_text;
         int text_color;
         
-        /* wrap text by inserting newlines */
-        wrapped_text = wrap_text(menu->menu_items[i]->contents, menu->max_width, &wrapped_lines);        
+        /* wrap text by inserting newlines (maxwidth-1 for newline char)*/
+        wrapped_text = wrap_text(menu->menu_items[i]->contents, menu->max_width-1, &wrapped_lines); 
 
         /* color selected item */
         text_color = (i == menu->selected_item) ? TS_SELECTED : TS_NONSELECTED;
 
-        wattron(menu->menu_win, COLOR_PAIR(text_color));
-        mvwprintw(menu->menu_win, cur_line, 0, wrapped_text);
-        wattroff(menu->menu_win, COLOR_PAIR(text_color));
+        wattron(menu->sub_win, COLOR_PAIR(text_color));
+        mvwprintw(menu->sub_win, cur_line, 0, wrapped_text);
+        wattroff(menu->sub_win, COLOR_PAIR(text_color));
 
         cur_line += wrapped_lines;
 
         free(wrapped_text);
 
     }
+
+    wrefresh(menu->sub_win);
+    wrefresh(menu->menu_win);
 
     return 0;
 }
