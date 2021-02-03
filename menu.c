@@ -19,6 +19,7 @@ typedef struct MenuItem {
 } MenuItem;
 
 typedef struct Menu {
+    char* menu_name;
     MenuItem** menu_items;
     int menu_length;
     int selected_item;
@@ -45,11 +46,12 @@ create_menuitem(char* contents)
 }
 
 Menu* 
-create_menu(MenuItem** item_list)
+create_menu(char* menu_name, MenuItem** item_list)
 {
     Menu* new_menu;
 
     new_menu = malloc(sizeof(Menu));
+    new_menu->menu_name = menu_name;
     new_menu->menu_items = item_list;
     new_menu->menu_length = array_length(MenuItem*, item_list);
     new_menu->selected_item = 0;
@@ -189,7 +191,7 @@ render_menu(Menu* menu)
         (menu->focused == true) ?
         TS_MENU_SELECTED: TS_MENU_NONSELECTED       
     ));
-    mvwprintw(menu->menu_win, 0, MENU_PAD_LEFT, "TODO");
+    mvwprintw(menu->menu_win, 0, MENU_PAD_LEFT, menu->menu_name);
     wattroff(menu->menu_win, COLOR_PAIR(0));
 
     /* draw inner menu */

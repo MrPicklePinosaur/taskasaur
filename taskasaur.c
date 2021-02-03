@@ -5,25 +5,23 @@
 #include "headers/utils.h"
 #include "config.h"
 
+MenuItem** todolist_to_menuitem(TodoItem** item_list, int list_length);
+
 int
 main(int argc, char** argv)
 {
-    char ch;
-    /* Board* board; */
-    /* board = begin_parse("test_board.md"); */
-    /* log_todo(board); */
+
+    /* read from todo file */
+    Board* board;
+    board = begin_parse("test_board.md");
+    log_todo(board);
 
     /* init curses */
     init_tscurses();
 
-    MenuItem** item_list = malloc(5*sizeof(MenuItem*));   
-    item_list[0] = create_menuitem("Many of you are probably feeling a little sad."); 
-    item_list[1] = create_menuitem("This is ok. Sadness is a normal human emotion."); 
-    item_list[2] = create_menuitem("I encourage you to watch the movie Inside Out"); 
-    item_list[3] = create_menuitem("one of the best movies of all time."); 
-    item_list[4] = 0;
-
-    Menu* menu = create_menu(item_list);
+    TodoList* todo_list = board->todolist_list[0];
+    MenuItem** item_list = todolist_to_menuitem(todo_list->item_list, todo_list->item_count);
+    Menu* menu = create_menu(todo_list->list_name, item_list);
     WINDOW* win = newwin(20, 40, 5, 5);
     set_menu_win(menu, win);
     set_menu_focus(menu, true);
@@ -33,6 +31,7 @@ main(int argc, char** argv)
 
     render_menu(menu);
 
+    char ch;
     while ((ch = getch()) != BINDING_QUIT) {
 
         switch (ch) {
@@ -68,4 +67,20 @@ main(int argc, char** argv)
     exit_tscurses();
     return 0;    
 }
+
+MenuItem** 
+todolist_to_menuitem(TodoItem** item_list, int list_length)
+{
+    MenuItem** items;
+
+    items = malloc((list_length+1)*sizeof(MenuItem*));
+    for (int i = 0; i < list_length; i++) {
+        items[i] = create_menuitem(item_list[i]->item_name);
+    }
+
+    items[list_length] = 0; //null terminate
+    return items;
+}
+
+
 

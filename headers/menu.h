@@ -22,7 +22,7 @@ typedef struct MenuItem MenuItem;
 
 extern MenuItem* create_menuitem(char* contents);
 
-extern Menu* create_menu(MenuItem** item_list);
+extern Menu* create_menu(char* menu_name, MenuItem** item_list);
 extern int set_menu_win(Menu* menu, WINDOW* win);
 extern MenuItem* get_menu_items(Menu* menu);
 extern int set_menu_focus(Menu* menu, bool focus);
