@@ -6,7 +6,9 @@
 
 enum TaskasaurColors {
     TS_SELECTED = 1,
-    TS_NONSELECTED
+    TS_NONSELECTED,
+    TS_MENU_SELECTED,
+    TS_MENU_NONSELECTED,
 };
 
 /* the ts is used to not conflict with builtin names */

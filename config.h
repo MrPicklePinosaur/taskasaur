@@ -19,8 +19,10 @@ static char font[] = "Source Code Pro:size=12";
  *      COLOR_WHITE
 */
 
-static int selected_color = COLOR_CYAN;
+static int selected_color = COLOR_MAGENTA;
 static int non_selected_color = COLOR_WHITE;
+static int menu_selected_color = COLOR_CYAN;
+static int menu_non_selected_color = COLOR_GREEN;
 
 /* KEYS */
 #define BINDING_QUIT 'q'

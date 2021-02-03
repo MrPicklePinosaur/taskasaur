@@ -44,6 +44,8 @@ init_tscolors(void)
 {
     init_pair(TS_SELECTED, selected_color, COLOR_BLACK);
     init_pair(TS_NONSELECTED, non_selected_color, COLOR_BLACK);
+    init_pair(TS_MENU_SELECTED, menu_selected_color, COLOR_BLACK);
+    init_pair(TS_MENU_NONSELECTED, menu_non_selected_color, COLOR_BLACK);
 
     return 0;
 }

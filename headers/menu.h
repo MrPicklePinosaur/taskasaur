@@ -2,6 +2,8 @@
 #ifndef __MENU_H__
 #define __MENU_H__
 
+#include <stdbool.h>
+
 /* ncurses doesn't support multiline menu items,
  * so i wrote my own menu lib */
 
@@ -23,6 +25,7 @@ extern MenuItem* create_menuitem(char* contents);
 extern Menu* create_menu(MenuItem** item_list);
 extern int set_menu_win(Menu* menu, WINDOW* win);
 extern MenuItem* get_menu_items(Menu* menu);
+extern int set_menu_focus(Menu* menu, bool focus);
 
 extern int menu_driver(Menu* menu, MenuAction action);
 

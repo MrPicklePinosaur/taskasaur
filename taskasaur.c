@@ -26,6 +26,7 @@ main(int argc, char** argv)
     Menu* menu = create_menu(item_list);
     WINDOW* win = newwin(20, 40, 5, 5);
     set_menu_win(menu, win);
+    set_menu_focus(menu, true);
     box(win, 0, 0);
     refresh();
     wrefresh(win);

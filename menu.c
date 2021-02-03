@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include <stdbool.h>
 #include <ncurses.h>
 
 #include "headers/menu.h"
@@ -21,6 +22,8 @@ typedef struct Menu {
     MenuItem** menu_items;
     int menu_length;
     int selected_item;
+    int scroll_offset;
+    bool focused;
     WINDOW* menu_win;
     WINDOW* sub_win;
     int max_height;
@@ -50,6 +53,8 @@ create_menu(MenuItem** item_list)
     new_menu->menu_items = item_list;
     new_menu->menu_length = array_length(MenuItem*, item_list);
     new_menu->selected_item = 0;
+    new_menu->scroll_offset = 0;
+    new_menu->focused = false;
     set_menu_win(new_menu, stdscr);
 
     return new_menu;
@@ -81,6 +86,14 @@ MenuItem*
 get_menu_items(Menu* menu)
 {
     return NULL;
+}
+
+int
+set_menu_focus(Menu* menu, bool focus)
+{
+    menu->focused = focus;
+    
+    return 0;
 }
 
 int
@@ -155,7 +168,7 @@ menu_driver(Menu* menu, MenuAction action)
 
         case MENU_DELETE:
             delete_item(menu, menu->selected_item);
-            wclear(menu->menu_win);
+            wclear(menu->sub_win);
             break;
 
         default: // This is here for debug, disable later
@@ -169,25 +182,33 @@ int
 render_menu(Menu* menu)
 {
     /* draw outer menu (prob dont need this every render) */ 
+    int menu_header_color;
+
+    /* menu_header_color = */ 
+    wattron(menu->menu_win, COLOR_PAIR(
+        (menu->focused == true) ?
+        TS_MENU_SELECTED: TS_MENU_NONSELECTED       
+    ));
     mvwprintw(menu->menu_win, 0, MENU_PAD_LEFT, "TODO");
+    wattroff(menu->menu_win, COLOR_PAIR(0));
 
     /* draw inner menu */
     int cur_line = 0;
-    for (int i = 0; i < menu->menu_length; i++) {
+    for (int i = 0; i < menu->menu_length-menu->scroll_offset; i++) {
 
         int wrapped_lines;
         char* wrapped_text;
-        int text_color;
         
         /* wrap text by inserting newlines (maxwidth-1 for newline char)*/
         wrapped_text = wrap_text(menu->menu_items[i]->contents, menu->max_width-1, &wrapped_lines); 
 
         /* color selected item */
-        text_color = (i == menu->selected_item) ? TS_SELECTED : TS_NONSELECTED;
-
-        wattron(menu->sub_win, COLOR_PAIR(text_color));
+        wattron(menu->sub_win, COLOR_PAIR(
+           (i == menu->selected_item && menu->focused == true) ? 
+           TS_SELECTED : TS_NONSELECTED
+        ));
         mvwprintw(menu->sub_win, cur_line, 0, wrapped_text);
-        wattroff(menu->sub_win, COLOR_PAIR(text_color));
+        wattroff(menu->sub_win, COLOR_PAIR(0));
 
         cur_line += wrapped_lines;
 
