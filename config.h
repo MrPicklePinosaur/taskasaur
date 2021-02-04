@@ -28,6 +28,8 @@ static int menu_non_selected_color = COLOR_GREEN;
 #define BINDING_QUIT 'q'
 #define BINDING_SCROLL_UP 'k'
 #define BINDING_SCROLL_DOWN 'j'
+#define BINDING_SCROLL_LEFT 'h'
+#define BINDING_SCROLL_RIGHT 'l'
 #define BINDING_JUMP_TOP 'g'
 #define BINDING_JUMP_BOTTOM 'G'
 #define BINDING_MOVE_ITEM_UP 'K'
