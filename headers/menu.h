@@ -26,6 +26,9 @@ extern Menu* create_menu(char* menu_name, MenuItem** item_list);
 extern int set_menu_win(Menu* menu, WINDOW* win);
 extern MenuItem* get_menu_items(Menu* menu);
 extern int set_menu_focus(Menu* menu, bool focus);
+extern int get_selected_item(Menu* menu);
+extern int set_selected_item(Menu* menu, int selected_item);
+extern int get_menu_length(Menu* menu);
 
 extern int menu_driver(Menu* menu, MenuAction action);
 

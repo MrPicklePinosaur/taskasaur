@@ -17,7 +17,6 @@ int set_selected_menu(BoardMenu* boardmenu, int index);
 MenuItem** todolist_to_menuitem(TodoItem** item_list, int list_length);
 Menu** make_menus(Board* board, int todolist_length);
 
-
 int
 main(int argc, char** argv)
 {
@@ -74,7 +73,6 @@ main(int argc, char** argv)
             case BINDING_DELETE_ITEM:
                 menu_driver(active_menu, MENU_DELETE);
                 break;
-
         }
 
         for (int i = 0; i < boardmenu->menu_count; i++) {
@@ -106,12 +104,19 @@ set_selected_menu(BoardMenu* boardmenu, int index)
 {
     Menu* old_menu;
     Menu* new_menu;
+    int new_pos;
     
     old_menu = boardmenu->menu_list[boardmenu->selected];
     new_menu = boardmenu->menu_list[index];
 
     set_menu_focus(old_menu, false);
     set_menu_focus(new_menu, true);
+
+    /* also try to jump to a similar position if possible */
+    /* rn theres a bug if old menu is empty */
+    new_pos = (get_selected_item(old_menu) > get_menu_length(new_menu)-1) ?
+        get_menu_length(new_menu)-1 : get_selected_item(old_menu);
+    set_selected_item(new_menu, new_pos);
 
     boardmenu->selected = index;
 

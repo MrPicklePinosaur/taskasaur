@@ -99,6 +99,26 @@ set_menu_focus(Menu* menu, bool focus)
 }
 
 int
+get_selected_item(Menu* menu)
+{
+    return menu->selected_item;
+}
+
+int
+set_selected_item(Menu* menu, int selected_item)
+{
+    menu->selected_item = selected_item;
+
+    return 0;
+}
+
+int
+get_menu_length(Menu* menu)
+{
+    return menu->menu_length;
+}
+
+int
 swap_item(Menu* menu, int src_index, int dest_index)
 {
     MenuItem* temp;
