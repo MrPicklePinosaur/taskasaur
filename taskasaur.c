@@ -73,11 +73,15 @@ main(int argc, char** argv)
             case BINDING_DELETE_ITEM:
                 menu_driver(active_menu, MENU_DELETE);
                 break;
+            case BINDING_APPEND_ITEM:
+                menu_driver(active_menu, MENU_APPEND);
+                break;
         }
 
         for (int i = 0; i < boardmenu->menu_count; i++) {
             render_menu(boardmenu->menu_list[i]);
         }
+
 
     }
 

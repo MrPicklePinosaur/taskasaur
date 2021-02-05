@@ -12,8 +12,7 @@ init_tscurses(void)
 {
     initscr();
     cbreak();
-    noecho();
-    curs_set(0);
+    curs_off();
     keypad(stdscr, TRUE);
 
     /* need to error check this */
@@ -47,6 +46,23 @@ init_tscolors(void)
     init_pair(TS_MENU_SELECTED, menu_selected_color, COLOR_BLACK);
     init_pair(TS_MENU_NONSELECTED, menu_non_selected_color, COLOR_BLACK);
 
+    return 0;
+}
+
+/* cursor */
+int
+curs_on(void)
+{
+    echo();
+    curs_set(1);
+    return 0;
+}
+
+int
+curs_off(void)
+{
+    noecho();
+    curs_set(0);
     return 0;
 }
 

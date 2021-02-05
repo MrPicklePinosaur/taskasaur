@@ -14,7 +14,8 @@ typedef enum {
     MENU_BOTTOM,
     MENU_MOVE_UP,
     MENU_MOVE_DOWN,
-    MENU_DELETE
+    MENU_DELETE,
+    MENU_APPEND
 } MenuAction;
 
 typedef struct Menu Menu;

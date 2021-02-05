@@ -15,4 +15,7 @@ enum TaskasaurColors {
 extern int init_tscurses(void);
 extern int exit_tscurses(void);
 
+extern int curs_on(void);
+extern int curs_off(void);
+
 #endif

@@ -14,6 +14,8 @@
 #define MENU_PAD_LEFT 2
 #define MENU_PAD_RIGHT 1
 
+#define MAX_CONTENTS_LENGTH 256
+
 typedef struct MenuItem {
     char* contents;
 } MenuItem;
@@ -33,6 +35,7 @@ typedef struct Menu {
 
 int swap_item(Menu* menu, int src_index, int dest_index);
 int delete_item(Menu* menu, int index);
+int insert_item(Menu* menu, int index);
 
 MenuItem*
 create_menuitem(char* contents)
@@ -155,6 +158,43 @@ delete_item(Menu* menu, int index)
     return 0;
 }
 
+int 
+insert_item(Menu* menu, int index)
+{ // note, this func does not validate index
+
+    char* new_content;
+    MenuItem* new_menuitem;
+
+    // remember null char
+    /* new_content = malloc((MAX_CONTENTS_LENGTH+1)*sizeof(char)); */ 
+    new_content = malloc(10);
+    new_content = "abcdefghi";
+
+    new_menuitem = create_menuitem(new_content);
+
+    /* resize array and insert */
+    /* char out[100]; */
+    /* sprintf(out, "%d\n", menu->menu_length); */
+    /* mvprintw(0, 0, out); */
+    /* menu->menu_items = realloc(menu->menu_items, (menu->menu_length+1)*sizeof(MenuItem*)); */
+
+    /* int temp_size = (menu->menu_length-index)*sizeof(MenuItem*); */
+    /* MenuItem* temp[temp_size]; */
+
+    /* memcpy(temp, menu->menu_items[index], temp_size); */
+    /* menu->menu_items[index] = new_menuitem; */
+    /* memcpy(menu->menu_items[index+1], temp, temp_size); */
+
+    /* menu->menu_items[menu->menu_length] = 0; // remember null at end */   
+    /* menu->menu_length += 1; */
+
+
+    /* move cursor pos */
+    /* menu->selected_item = index; */
+
+    return 0;
+}
+
 int
 menu_driver(Menu* menu, MenuAction action)
 {
@@ -190,6 +230,14 @@ menu_driver(Menu* menu, MenuAction action)
 
         case MENU_DELETE:
             delete_item(menu, menu->selected_item);
+            wclear(menu->sub_win);
+            break;
+
+        case MENU_APPEND:
+            /* curs_on(); */
+            /* curs_off(); */
+            /* insert_item(menu, menu->selected_item); */
+            insert_item(menu, 0);
             wclear(menu->sub_win);
             break;
 
