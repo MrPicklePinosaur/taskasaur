@@ -1,25 +1,16 @@
+
 CC=gcc
+CFLAGS=-g -Wall -Wno-unused-variable -Wno-switch
 
 make: taskasaur
 
 all: taskasaur
 
-parser.o: parser.c headers/parser.h
-	$(CC) -c parser.c
+%.o: %.c headers/%.h config.h 
+	$(CC) $(CFLAGS) -c $<
 
-render.o: render.c headers/render.h
-	$(CC) -c render.c
-
-menu.o: menu.c headers/menu.h
-	$(CC) -c menu.c
-
-utils.o: utils.c headers/utils.h
-	$(CC) -c utils.c
-
-# include config.h as depend
-
-taskasaur: taskasaur.c parser.o render.o menu.o utils.o config.h
-	$(CC) -o $@ $^ -lncurses -lmd4c
+taskasaur: taskasaur.c menu.o parser.o render.o utils.o
+	$(CC) $(CFLAGS) -o $@ $^ -lncurses -lmd4c
 
 clean:
 	rm taskasaur *.o

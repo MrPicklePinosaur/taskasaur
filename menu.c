@@ -139,11 +139,9 @@ delete_item(Menu* menu, int index)
     if (index < 0 || index > menu->menu_length-1) return -1;
 
     int temp_size = (menu->menu_length-index-1)*sizeof(MenuItem*);
-    MenuItem* temp[temp_size];
 
     /* might break if last item? */
-    memcpy(temp, menu->menu_items[index+1], temp_size);
-    memcpy(menu->menu_items[index], temp, temp_size);
+    memmove(menu->menu_items[index], menu->menu_items[index+1], temp_size);
 
     menu->menu_items = realloc(menu->menu_items, menu->menu_length*sizeof(MenuItem*)); 
     menu->menu_items[menu->menu_length-1] = 0; // preserve null at end
@@ -167,30 +165,22 @@ insert_item(Menu* menu, int index)
 
     // remember null char
     /* new_content = malloc((MAX_CONTENTS_LENGTH+1)*sizeof(char)); */ 
-    new_content = malloc(10);
-    new_content = "abcdefghi";
+    new_content = strdup("lmao");
 
     new_menuitem = create_menuitem(new_content);
 
     /* resize array and insert */
-    /* char out[100]; */
-    /* sprintf(out, "%d\n", menu->menu_length); */
-    /* mvprintw(0, 0, out); */
-    /* menu->menu_items = realloc(menu->menu_items, (menu->menu_length+1)*sizeof(MenuItem*)); */
+    menu->menu_items = realloc(menu->menu_items, (menu->menu_length+2)*sizeof(MenuItem*));
 
-    /* int temp_size = (menu->menu_length-index)*sizeof(MenuItem*); */
-    /* MenuItem* temp[temp_size]; */
+    int temp_size = menu->menu_length-index*sizeof(MenuItem*);
+    memmove(menu->menu_items[index], menu->menu_items[index+1], temp_size);
 
-    /* memcpy(temp, menu->menu_items[index], temp_size); */
-    /* menu->menu_items[index] = new_menuitem; */
-    /* memcpy(menu->menu_items[index+1], temp, temp_size); */
-
-    /* menu->menu_items[menu->menu_length] = 0; // remember null at end */   
-    /* menu->menu_length += 1; */
-
+    menu->menu_items[index] = new_menuitem;
+    menu->menu_items[menu->menu_length+1] = 0; // remember null at end   
+    menu->menu_length += 1;
 
     /* move cursor pos */
-    /* menu->selected_item = index; */
+    menu->selected_item = index;
 
     return 0;
 }

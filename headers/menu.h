@@ -3,6 +3,7 @@
 #define __MENU_H__
 
 #include <stdbool.h>
+#include <ncurses.h>
 
 /* ncurses doesn't support multiline menu items,
  * so i wrote my own menu lib */
