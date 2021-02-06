@@ -172,8 +172,9 @@ insert_item(Menu* menu, int index)
     /* resize array and insert */
     menu->menu_items = realloc(menu->menu_items, (menu->menu_length+2)*sizeof(MenuItem*));
 
-    int temp_size = menu->menu_length-index*sizeof(MenuItem*);
-    memmove(menu->menu_items[index], menu->menu_items[index+1], temp_size);
+    for (int i = menu->menu_length; i > index; i--) {
+        menu->menu_items[i] = menu->menu_items[i-1];
+    }
 
     menu->menu_items[index] = new_menuitem;
     menu->menu_items[menu->menu_length+1] = 0; // remember null at end   
@@ -227,7 +228,7 @@ menu_driver(Menu* menu, MenuAction action)
             /* curs_on(); */
             /* curs_off(); */
             /* insert_item(menu, menu->selected_item); */
-            insert_item(menu, 0);
+            insert_item(menu, menu->selected_item);
             wclear(menu->sub_win);
             break;
 
