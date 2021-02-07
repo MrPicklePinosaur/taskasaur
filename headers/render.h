@@ -18,4 +18,8 @@ extern int exit_tscurses(void);
 extern int curs_on(void);
 extern int curs_off(void);
 
+/* some helpers */
+extern int ungetstr(char* str);
+
+
 #endif

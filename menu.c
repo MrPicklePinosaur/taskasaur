@@ -37,6 +37,9 @@ int swap_item(Menu* menu, int src_index, int dest_index);
 int delete_item(Menu* menu, int index);
 int insert_item(Menu* menu, int index);
 
+/* insert mode */
+int menu_insert_mode(Menu* menu, int insert_index);
+
 MenuItem*
 create_menuitem(char* contents)
 {
@@ -165,7 +168,7 @@ insert_item(Menu* menu, int index)
 
     // remember null char
     /* new_content = malloc((MAX_CONTENTS_LENGTH+1)*sizeof(char)); */ 
-    new_content = strdup("lmao");
+    new_content = strdup("");
 
     new_menuitem = create_menuitem(new_content);
 
@@ -182,6 +185,35 @@ insert_item(Menu* menu, int index)
 
     /* move cursor pos */
     menu->selected_item = index;
+
+    return 0;
+}
+
+int
+menu_insert_mode(Menu* menu, int insert_index)
+{
+    char temp[MAX_CONTENTS_LENGTH+1]; // remember null
+    char* new_contents;
+
+    /* this is bad */
+    wclear(menu->sub_win);
+    render_menu(menu);
+
+    curs_on();
+
+    /* move cursor to right spot */
+    ungetstr(menu->menu_items[insert_index]->contents);
+    mvwgetnstr(menu->sub_win,
+        insert_index, // account for wrap later too
+        0,
+        temp,
+        MAX_CONTENTS_LENGTH
+    );
+    curs_off();
+
+    /* copy out */
+    new_contents = strdup(temp);
+    menu->menu_items[insert_index]->contents = new_contents;
 
     return 0;
 }
@@ -225,11 +257,24 @@ menu_driver(Menu* menu, MenuAction action)
             break;
 
         case MENU_APPEND:
-            /* curs_on(); */
-            /* curs_off(); */
-            /* insert_item(menu, menu->selected_item); */
-            insert_item(menu, menu->selected_item);
+            insert_item(menu, menu->menu_length);
             wclear(menu->sub_win);
+            break;
+
+        case MENU_INSERT_ABOVE:
+            ;
+            int insert_ind = menu->selected_item;
+            insert_item(menu, insert_ind);
+            menu_insert_mode(menu, insert_ind);
+
+            break;
+
+        case MENU_INSERT_BELOW:
+            insert_item(menu,
+                (menu->selected_item >= menu->menu_length-1) ? menu->menu_length : menu->selected_item+1
+            );
+            wclear(menu->sub_win);
+
             break;
 
         default: // This is here for debug, disable later

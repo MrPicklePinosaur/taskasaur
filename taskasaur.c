@@ -76,6 +76,12 @@ main(int argc, char** argv)
             case BINDING_APPEND_ITEM:
                 menu_driver(active_menu, MENU_APPEND);
                 break;
+            case BINDING_INSERT_ABOVE:
+                menu_driver(active_menu, MENU_INSERT_ABOVE);
+                break;
+            case BINDING_INSERT_BELOW:
+                menu_driver(active_menu, MENU_INSERT_BELOW);
+                break;
         }
 
         for (int i = 0; i < boardmenu->menu_count; i++) {

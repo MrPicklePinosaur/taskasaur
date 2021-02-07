@@ -1,5 +1,6 @@
 
 #include "headers/render.h"
+#include <string.h>
 #include "config.h"
 
 int init_tscolors(void);
@@ -74,5 +75,16 @@ create_todowin(void)
 
 
     return 0;
+}
+
+int
+ungetstr(char* str)
+{
+    // ignore null character (it's fine even if strlen = 0)
+    for (int i = strlen(str)-1; i >= 0; i--) {
+        ungetch(str[i]);
+    }
+
+    return 0; 
 }
 

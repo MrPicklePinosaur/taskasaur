@@ -37,5 +37,7 @@ static int menu_non_selected_color = COLOR_GREEN;
 #define BINDING_DELETE_ITEM 'D'
 #define BINDING_SELECT '\n'
 #define BINDING_APPEND_ITEM 'a'
+#define BINDING_INSERT_ABOVE 'O'
+#define BINDING_INSERT_BELOW 'o'
 
 #endif
