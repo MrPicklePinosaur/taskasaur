@@ -70,6 +70,12 @@ main(int argc, char** argv)
             case BINDING_MOVE_ITEM_DOWN:
                 menu_driver(active_menu, MENU_MOVE_DOWN);
                 break;
+            case BINDING_MOVE_ITEM_LEFT:
+
+                break;
+            case BINDING_MOVE_ITEM_RIGHT:
+
+                break;
             case BINDING_DELETE_ITEM:
                 menu_driver(active_menu, MENU_DELETE);
                 break;
@@ -81,6 +87,9 @@ main(int argc, char** argv)
                 break;
             case BINDING_INSERT_BELOW:
                 menu_driver(active_menu, MENU_INSERT_BELOW);
+                break;
+            case BINDING_EDIT_ITEM:
+                menu_driver(active_menu, MENU_EDIT);
                 break;
         }
 

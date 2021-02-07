@@ -258,23 +258,21 @@ menu_driver(Menu* menu, MenuAction action)
 
         case MENU_APPEND:
             insert_item(menu, menu->menu_length);
-            wclear(menu->sub_win);
+            menu_insert_mode(menu, menu->selected_item);
             break;
 
         case MENU_INSERT_ABOVE:
-            ;
-            int insert_ind = menu->selected_item;
-            insert_item(menu, insert_ind);
-            menu_insert_mode(menu, insert_ind);
-
+            insert_item(menu, menu->selected_item);
+            menu_insert_mode(menu, menu->selected_item);
             break;
 
         case MENU_INSERT_BELOW:
-            insert_item(menu,
-                (menu->selected_item >= menu->menu_length-1) ? menu->menu_length : menu->selected_item+1
-            );
-            wclear(menu->sub_win);
+            insert_item(menu, menu->selected_item+1);
+            menu_insert_mode(menu, menu->selected_item); // inserted item is cur now
+            break;
 
+        case MENU_EDIT:
+            menu_insert_mode(menu, menu->selected_item);
             break;
 
         default: // This is here for debug, disable later
