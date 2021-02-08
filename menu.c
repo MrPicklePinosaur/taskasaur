@@ -34,11 +34,13 @@ typedef struct Menu {
 } Menu;
 
 int swap_item(Menu* menu, int src_index, int dest_index);
-int delete_item(Menu* menu, int index);
-int insert_item(Menu* menu, int index);
 
 /* insert mode */
 int menu_insert_mode(Menu* menu, int insert_index);
+
+/* prob temp for now */
+MenuItem* create_blank_menuitem(void);
+
 
 MenuItem*
 create_menuitem(char* contents)
@@ -49,6 +51,12 @@ create_menuitem(char* contents)
     new_menuitem->contents = contents;
 
     return new_menuitem;
+}
+
+MenuItem*
+create_blank_menuitem(void)
+{
+    return create_menuitem(strdup(""));
 }
 
 Menu* 
@@ -91,9 +99,11 @@ set_menu_win(Menu* menu, WINDOW* win)
 }
 
 MenuItem*
-get_menu_items(Menu* menu)
+get_menu_item(Menu* menu, int index)
 {
-    return NULL;
+    if (index < 0 || index >= menu->menu_length) return NULL;
+
+    return menu->menu_items[index];
 }
 
 int
@@ -141,10 +151,9 @@ delete_item(Menu* menu, int index)
 {
     if (index < 0 || index > menu->menu_length-1) return -1;
 
-    int temp_size = (menu->menu_length-index-1)*sizeof(MenuItem*);
-
-    /* might break if last item? */
-    memmove(menu->menu_items[index], menu->menu_items[index+1], temp_size);
+    for (int i = index; i <= menu->menu_length-1; i++) {
+        menu->menu_items[i] = menu->menu_items[i+1];
+    }
 
     menu->menu_items = realloc(menu->menu_items, menu->menu_length*sizeof(MenuItem*)); 
     menu->menu_items[menu->menu_length-1] = 0; // preserve null at end
@@ -156,21 +165,14 @@ delete_item(Menu* menu, int index)
         menu->selected_item = menu->menu_length-1;
     }
 
+    wclear(menu->sub_win);
+
     return 0;
 }
 
 int 
-insert_item(Menu* menu, int index)
+insert_item(Menu* menu, MenuItem* menuitem, int index)
 { // note, this func does not validate index
-
-    char* new_content;
-    MenuItem* new_menuitem;
-
-    // remember null char
-    /* new_content = malloc((MAX_CONTENTS_LENGTH+1)*sizeof(char)); */ 
-    new_content = strdup("");
-
-    new_menuitem = create_menuitem(new_content);
 
     /* resize array and insert */
     menu->menu_items = realloc(menu->menu_items, (menu->menu_length+2)*sizeof(MenuItem*));
@@ -179,7 +181,7 @@ insert_item(Menu* menu, int index)
         menu->menu_items[i] = menu->menu_items[i-1];
     }
 
-    menu->menu_items[index] = new_menuitem;
+    menu->menu_items[index] = menuitem;
     menu->menu_items[menu->menu_length+1] = 0; // remember null at end   
     menu->menu_length += 1;
 
@@ -214,6 +216,11 @@ menu_insert_mode(Menu* menu, int insert_index)
     /* copy out */
     new_contents = strdup(temp);
     menu->menu_items[insert_index]->contents = new_contents;
+
+    /* delete if empty - maybe move this to a cleanup stage */
+    if (strlen(new_contents) == 0) {
+        delete_item(menu, insert_index);
+    }
 
     return 0;
 }
@@ -253,21 +260,20 @@ menu_driver(Menu* menu, MenuAction action)
 
         case MENU_DELETE:
             delete_item(menu, menu->selected_item);
-            wclear(menu->sub_win);
             break;
 
         case MENU_APPEND:
-            insert_item(menu, menu->menu_length);
+            insert_item(menu, create_blank_menuitem(), menu->menu_length);
             menu_insert_mode(menu, menu->selected_item);
             break;
 
         case MENU_INSERT_ABOVE:
-            insert_item(menu, menu->selected_item);
+            insert_item(menu, create_blank_menuitem(), menu->selected_item);
             menu_insert_mode(menu, menu->selected_item);
             break;
 
         case MENU_INSERT_BELOW:
-            insert_item(menu, menu->selected_item+1);
+            insert_item(menu, create_blank_menuitem(), menu->selected_item+1);
             menu_insert_mode(menu, menu->selected_item); // inserted item is cur now
             break;
 

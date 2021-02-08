@@ -71,9 +71,60 @@ main(int argc, char** argv)
                 menu_driver(active_menu, MENU_MOVE_DOWN);
                 break;
             case BINDING_MOVE_ITEM_LEFT:
+                if (boardmenu->selected-1 < 0) break;
+                {
+                    Menu* from_menu;
+                    Menu* to_menu;
+
+                    from_menu = boardmenu->menu_list[boardmenu->selected],
+                    to_menu = boardmenu->menu_list[boardmenu->selected-1],
+
+                    insert_item(
+                        to_menu,
+                        get_menu_item(
+                            from_menu,
+                            get_selected_item(from_menu)
+                        ),
+                        min(
+                            get_selected_item(from_menu),
+                            get_menu_length(to_menu)
+                        )
+                    );
+                    delete_item(
+                        from_menu,
+                        get_selected_item(from_menu) 
+                    );
+                    set_selected_menu(boardmenu, boardmenu->selected-1);
+                }
 
                 break;
             case BINDING_MOVE_ITEM_RIGHT:
+                if (boardmenu->selected >= boardmenu->menu_count-1) break;
+                // this is legit cpy paste please fix this
+                {
+                    Menu* from_menu;
+                    Menu* to_menu;
+
+                    from_menu = boardmenu->menu_list[boardmenu->selected],
+                    to_menu = boardmenu->menu_list[boardmenu->selected+1],
+
+                    insert_item(
+                        to_menu,
+                        get_menu_item(
+                            from_menu,
+                            get_selected_item(from_menu)
+                        ),
+                        min(
+                            get_selected_item(from_menu),
+                            get_menu_length(to_menu)
+                        )
+                    );
+                    delete_item(
+                        from_menu,
+                        get_selected_item(from_menu) 
+                    );
+                    set_selected_menu(boardmenu, boardmenu->selected+1);
+                }
 
                 break;
             case BINDING_DELETE_ITEM:
@@ -133,8 +184,7 @@ set_selected_menu(BoardMenu* boardmenu, int index)
 
     /* also try to jump to a similar position if possible */
     /* rn theres a bug if old menu is empty */
-    new_pos = (get_selected_item(old_menu) > get_menu_length(new_menu)-1) ?
-        get_menu_length(new_menu)-1 : get_selected_item(old_menu);
+    new_pos = min(get_selected_item(old_menu), get_menu_length(new_menu)-1);
     set_selected_item(new_menu, new_pos);
 
     boardmenu->selected = index;

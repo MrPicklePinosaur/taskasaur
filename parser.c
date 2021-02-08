@@ -165,6 +165,7 @@ exit_todolist(State* state)
     sb->todolist_list[sb->todolist_count-1] = state->cur_todolist;
     state->cur_todolist = NULL;
 
+    #undef sb
 }
 
 void
