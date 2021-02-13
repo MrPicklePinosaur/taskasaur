@@ -76,6 +76,12 @@ create_menu(char* menu_name, MenuItem** item_list)
     return new_menu;
 }
 
+WINDOW*
+get_menu_win(Menu* menu)
+{
+    return menu->menu_win;
+}
+
 int
 set_menu_win(Menu* menu, WINDOW* win)
 {
@@ -96,6 +102,12 @@ set_menu_win(Menu* menu, WINDOW* win)
     );
 
     return 0;
+}
+
+WINDOW*
+get_menu_subwin(Menu* menu)
+{
+    return menu->sub_win;
 }
 
 MenuItem*
@@ -137,11 +149,7 @@ get_menu_length(Menu* menu)
 int
 swap_item(Menu* menu, int src_index, int dest_index)
 {
-    MenuItem* temp;
-
-    temp = menu->menu_items[dest_index];
-    menu->menu_items[dest_index] = menu->menu_items[src_index];
-    menu->menu_items[src_index] = temp;
+    ar_swap_item(menu->menu_items, src_index, dest_index);
 
     return 0;
 }

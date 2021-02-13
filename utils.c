@@ -47,4 +47,17 @@ wrap_text(char* str, int max_width, int* lines)
 
 }
 
+/* array stuff */
+int
+ar_swap_item(void** arr, int src_index, int dest_index) 
+{
+    void* temp;
+
+    temp = arr[dest_index];
+    arr[dest_index] = arr[src_index];
+    arr[src_index] = temp;
+
+    return 0;
+}
+
 

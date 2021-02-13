@@ -5,6 +5,9 @@
 #include "headers/utils.h"
 #include "config.h"
 
+// this is temp
+#define MENU_WIDTH 40
+
 typedef struct BoardMenu {
     Menu** menu_list;
     int menu_count;
@@ -16,6 +19,7 @@ int set_selected_menu(BoardMenu* boardmenu, int index);
 
 MenuItem** todolist_to_menuitem(TodoItem** item_list, int list_length);
 Menu** make_menus(Board* board, int todolist_length);
+int swap_menu(BoardMenu* boardmenu, int src_index, int dest_index);
 
 int
 main(int argc, char** argv)
@@ -139,6 +143,21 @@ main(int argc, char** argv)
             case BINDING_INSERT_BELOW:
                 menu_driver(active_menu, MENU_INSERT_BELOW);
                 break;
+            /* case BINDING_MOVE_MENU_LEFT: */
+            /*     if (boardmenu->selected-1 < 0) break; */
+
+            /*     swap_menu(boardmenu, boardmenu->selected, boardmenu->selected-1); */
+                /* boardmenu->selected -= 1; */
+                /* set_selected_menu(boardmenu, boardmenu->selected); */
+
+/*                 break; */
+/*             case BINDING_MOVE_MENU_RIGHT: */
+/*                 if (boardmenu->selected >= boardmenu->menu_count-1) break; */
+/*                 swap_menu(boardmenu, boardmenu->selected, boardmenu->selected+1); */
+                /* boardmenu->selected += 1; */
+                /* set_selected_menu(boardmenu, boardmenu->selected); */
+
+                break;
             case BINDING_EDIT_ITEM:
                 menu_driver(active_menu, MENU_EDIT);
                 break;
@@ -209,8 +228,6 @@ todolist_to_menuitem(TodoItem** item_list, int list_length)
 Menu**
 make_menus(Board* board, int todolist_length)
 {
-    // this is temp
-    #define MENU_WIDTH 40
 
     Menu** menu_list;
 
@@ -241,3 +258,28 @@ make_menus(Board* board, int todolist_length)
 
     return menu_list;
 }
+
+int
+swap_menu(BoardMenu* boardmenu, int src_index, int dest_index)
+{
+    /* reposition menus */
+    mvwin(get_menu_win(boardmenu->menu_list[src_index]),
+        1, 1+MENU_WIDTH*dest_index
+    );
+    mvwin(get_menu_win(boardmenu->menu_list[dest_index]),
+        1, 1+MENU_WIDTH*src_index
+    );
+    wrefresh(get_menu_win(boardmenu->menu_list[src_index]));
+    wrefresh(get_menu_win(boardmenu->menu_list[dest_index]));
+    /* wclear(get_menu_win(boardmenu->menu_list[src_index])); */
+    /* wclear(get_menu_win(boardmenu->menu_list[dest_index])); */
+    /* touchwin(get_menu_win(boardmenu->menu_list[src_index])); */
+    /* touchwin(get_menu_win(boardmenu->menu_list[dest_index])); */
+    clear();
+
+    /* swap in array */
+    ar_swap_item(boardmenu->menu_list, src_index, dest_index);
+
+    return 0;
+}
+

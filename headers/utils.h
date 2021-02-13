@@ -22,4 +22,7 @@ extern int min(int a, int b);
 
 extern char* wrap_text(char* str, int max_width, int* lines);
 
+/* array stuff */
+extern int ar_swap_item(void** arr, int src_index, int dest_index);
+
 #endif

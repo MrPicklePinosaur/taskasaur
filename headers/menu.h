@@ -28,7 +28,9 @@ typedef struct MenuItem MenuItem;
 extern MenuItem* create_menuitem(char* contents);
 
 extern Menu* create_menu(char* menu_name, MenuItem** item_list);
+extern WINDOW* get_menu_win(Menu* menu);
 extern int set_menu_win(Menu* menu, WINDOW* win);
+extern WINDOW* get_menu_subwin(Menu* menu);
 extern MenuItem* get_menu_item(Menu* menu, int index);
 extern int set_menu_focus(Menu* menu, bool focus);
 extern int get_selected_item(Menu* menu);
