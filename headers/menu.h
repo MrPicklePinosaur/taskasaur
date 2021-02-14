@@ -36,6 +36,7 @@ extern int set_menu_focus(Menu* menu, bool focus);
 extern int get_selected_item(Menu* menu);
 extern int set_selected_item(Menu* menu, int selected_item);
 extern int get_menu_length(Menu* menu);
+extern char* get_menu_name(Menu* menu);
 
 extern int insert_item(Menu* menu, MenuItem* menuitem, int index);
 extern int delete_item(Menu* menu, int index);

@@ -18,6 +18,7 @@
 
 typedef struct MenuItem {
     char* contents;
+    char* description;
 } MenuItem;
 
 typedef struct Menu {
@@ -144,6 +145,12 @@ int
 get_menu_length(Menu* menu)
 {
     return menu->menu_length;
+}
+
+char*
+get_menu_name(Menu* menu)
+{
+    return menu->menu_name;
 }
 
 int
@@ -329,6 +336,9 @@ render_menu(Menu* menu)
         wattroff(menu->sub_win, COLOR_PAIR(0));
 
         cur_line += wrapped_lines;
+
+        /* display number of items */
+        /* if (menu->menu_items[i]->) */
 
         free(wrapped_text);
 

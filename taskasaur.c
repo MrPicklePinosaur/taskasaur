@@ -15,6 +15,7 @@ typedef struct BoardMenu {
 } BoardMenu;
 
 BoardMenu* create_board_menu(Board* board);
+Board* boardmenu_to_board(BoardMenu* boardmenu);
 int set_selected_menu(BoardMenu* boardmenu, int index);
 
 MenuItem** todolist_to_menuitem(TodoItem** item_list, int list_length);
@@ -24,9 +25,12 @@ int swap_menu(BoardMenu* boardmenu, int src_index, int dest_index);
 int
 main(int argc, char** argv)
 {
+    char* boardfile_name = "test_board.md"; 
+    printf("%c]0;%s - %s%c", '\033', "taskasaur", boardfile_name, '\007'); // need to reset after program exits
+
     /* read from todo file */
     Board* board;
-    board = begin_parse("test_board.md");
+    board = begin_parse(boardfile_name);
     /* log_todo(board); */
 
     /* init curses */
@@ -150,16 +154,21 @@ main(int argc, char** argv)
                 /* boardmenu->selected -= 1; */
                 /* set_selected_menu(boardmenu, boardmenu->selected); */
 
-/*                 break; */
-/*             case BINDING_MOVE_MENU_RIGHT: */
-/*                 if (boardmenu->selected >= boardmenu->menu_count-1) break; */
-/*                 swap_menu(boardmenu, boardmenu->selected, boardmenu->selected+1); */
+                /* break; */
+            /* case BINDING_MOVE_MENU_RIGHT: */
+                /* if (boardmenu->selected >= boardmenu->menu_count-1) break; */
+                /* swap_menu(boardmenu, boardmenu->selected, boardmenu->selected+1); */
                 /* boardmenu->selected += 1; */
                 /* set_selected_menu(boardmenu, boardmenu->selected); */
 
-                break;
+                /* break; */
             case BINDING_EDIT_ITEM:
                 menu_driver(active_menu, MENU_EDIT);
+                break;
+            case BINDING_SELECT:
+                
+                break;
+            case BINDING_WRITE:
                 break;
         }
 
@@ -186,6 +195,35 @@ create_board_menu(Board* board)
     new_boardmenu->selected = 0;
 
     return new_boardmenu;
+}
+
+Board*
+boardmenu_to_board(BoardMenu* boardmenu)
+{
+    Board newboard = malloc(sizeof(Board));
+    TodoList** todolist_list = malloc(sizeof(TodoList*));
+
+    for (int i = 0; i < boardmenu->menu_count; i++) {
+        Menu* curmenu = boardmenu->menu_list[i];
+
+        TodoList* new_todolist = malloc(sizeof(TodoList));
+        TodoItem** item_list = malloc(sizeof(TodoItem*));
+        new_todolist->list_name = get_menu_name(curmenu);
+        new_todolist->item_count = get_menu_length(curmenu);
+
+        /* for (int j = 0; j < get_menu_length(curmenu); j++) { */
+             
+        /* } */
+
+        new_todolist->item_list = item_list;
+
+    }
+
+    newboard->todolist_list = todolist_list;
+    newboard->todolist_count = boardmenu->menu_count;
+
+    return newboard;
+    
 }
 
 int
@@ -269,6 +307,7 @@ swap_menu(BoardMenu* boardmenu, int src_index, int dest_index)
     mvwin(get_menu_win(boardmenu->menu_list[dest_index]),
         1, 1+MENU_WIDTH*src_index
     );
+    refresh();
     wrefresh(get_menu_win(boardmenu->menu_list[src_index]));
     wrefresh(get_menu_win(boardmenu->menu_list[dest_index]));
     /* wclear(get_menu_win(boardmenu->menu_list[src_index])); */
