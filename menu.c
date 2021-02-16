@@ -50,7 +50,7 @@ create_menuitem(char* title)
 
     new_menuitem = malloc(sizeof(MenuItem));
     new_menuitem->title = title;
-    new_menuitem->description = 0; //TEMP FOR NOW
+    new_menuitem->description = strdup(""); //TEMP FOR NOW
 
     return new_menuitem;
 }

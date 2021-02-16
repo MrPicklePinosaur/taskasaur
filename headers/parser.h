@@ -45,6 +45,7 @@ typedef struct Board {
 extern Board* begin_parse(char* board_path);
 extern int begin_write(char* board_path, Board* board);
 extern void log_todo(Board* board);
+extern int free_board(Board* board);
 
 #ifdef __cplusplus
 }

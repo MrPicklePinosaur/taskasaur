@@ -381,3 +381,33 @@ log_todo(Board* board)
         }
     }
 }
+
+int
+free_board(Board* board)
+{ // all the fields are being leaked rn
+
+    for (int i = 0; i < board->todolist_count; i++) {
+        TodoList* cur_todolist = board->todolist_list[i];
+
+        /* free(cur_todolist->list_name); */
+
+        for (int j = 0; j < cur_todolist->item_count; j++) {
+            TodoItem* cur_todoitem = cur_todolist->item_list[j];
+
+            /* free(cur_todoitem->item_name); */
+            /* free(cur_todoitem->description); */
+            /* free(cur_todoitem->due); */
+
+            /* free subtask later too */
+
+            free(cur_todoitem);
+        }
+
+        free(cur_todolist);
+    }
+
+    /* free(board->board_name); */
+    free(board);
+
+    return 0;
+}

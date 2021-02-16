@@ -171,14 +171,10 @@ main(int argc, char** argv)
             case BINDING_WRITE:
                 {
                     Board* writeboard;
-
                     writeboard = boardmenu_to_board(boardmenu);
 
-                    /* mvprintw(30, 5, "%s", writeboard->todolist_list[0]->list_name); */
                     begin_write(boardfile_name, writeboard);
-
-                    /* now free the writeborad */
-
+                    free_board(writeboard);
                 }
 
                 break;
@@ -221,8 +217,8 @@ boardmenu_to_board(BoardMenu* boardmenu)
         Menu* curmenu = boardmenu->menu_list[i];
 
         TodoList* new_todolist = malloc(sizeof(TodoList));
-        TodoItem** item_list = malloc(sizeof(TodoItem*));
-        new_todolist->list_name = get_menu_name(curmenu);
+        TodoItem** new_item_list = malloc(sizeof(TodoItem*));
+        new_todolist->list_name = strdup(get_menu_name(curmenu));
         new_todolist->item_count = get_menu_length(curmenu);
 
         for (int j = 0; j < get_menu_length(curmenu); j++) {
@@ -230,22 +226,21 @@ boardmenu_to_board(BoardMenu* boardmenu)
 
             TodoItem* new_todoitem = malloc(sizeof(TodoItem));
 
-            new_todoitem->item_name = get_menuitem_title(curmenuitem);
-            new_todoitem->description = get_menuitem_descrip(curmenuitem);
-            new_todoitem->due = 0; //TEMP! 
-            new_todoitem->subtask_list = 0; //TEMP!
+            new_todoitem->item_name = strdup(get_menuitem_title(curmenuitem));
+            new_todoitem->description = strdup(get_menuitem_descrip(curmenuitem));
+            new_todoitem->due = strdup(""); //TEMP! 
+            new_todoitem->subtask_list = malloc(0); //TEMP!
             new_todoitem->subtask_count = 0; //TEMP!
 
-            item_list[j] = new_todoitem;
-             
+            new_item_list[j] = new_todoitem;
         }
 
-        new_todolist->item_list = item_list;
-        
+        new_todolist->item_list = new_item_list;
         new_todolist_list[i] = new_todolist;
 
     }
 
+    newboard->board_name = strdup("");
     newboard->todolist_list = new_todolist_list;
     newboard->todolist_count = boardmenu->menu_count;
 
