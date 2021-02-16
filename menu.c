@@ -19,6 +19,7 @@
 typedef struct MenuItem {
     char* title;
     char* description;
+    void* user_data;
 } MenuItem;
 
 typedef struct Menu {
@@ -32,6 +33,7 @@ typedef struct Menu {
     WINDOW* sub_win;
     int max_height;
     int max_width;
+    void* user_data;
 } Menu;
 
 int swap_item(Menu* menu, int src_index, int dest_index);

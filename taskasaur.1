@@ -6,6 +6,28 @@ taskasaur \- suckless kanban
 [taskasaur options]
 .SH DESCRIPTION
 \fBtaskasaur\fP is a suckless style kanban program that runs on the command line with ncurses graphics. It stores data in the form of markdown for portability and readability.
+.SH DEFAULT KEYBINDINGS
+The default keybindings are vim inspired, you can change these in the config.h
+.SS cursor movement
+.TP
+[\fBh, j, k, l\fP] to move up, down and across the todo list.
+.TP
+[\fBg, G\fP] jump to top and bottom of list, respectively.
+.SS moving todo items
+.TP
+[\fBH, J, K, L\fP] to move the current hovered item.
+.SS creating todo item
+.TP
+[\fBa, o, O\fP] all create a new entry in the currently selected todo list. \fBa\fP inserts new item at the end of the list, \fBo\fP inserts below the cursor, while \fBO\fP inserts above.
+.SS deleting todo items
+.TP
+[\fBD\fP] to delete hovered item.
+.SS editing todo items
+.TP
+[\fBi\fP] to switch to insert mode on hovered item.
+.SS exiting
+.TP
+[\fBq\fP] to quit.
 .SH OPTIONS
 .SH AUTHORS
 \fBtaskasaur\fP was written by Daniel Liu
