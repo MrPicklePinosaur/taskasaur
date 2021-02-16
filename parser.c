@@ -44,35 +44,7 @@ const MD_PARSER parser = {
 };
 
 
-void
-log_todo(Board* board)
-{
-    for (int i = 0; i < board->todolist_count; i++) {
-        TodoList* todolist;
-        printf("List =-=-=-=-=-==-=-=-=-=-=-\n");
-        todolist = board->todolist_list[i];
-        printf("List name: %s\n", todolist->list_name);
-        printf("Num of items: %d\n", todolist->item_count);
-
-        for (int j = 0; j < todolist->item_count; j++) {
-            TodoItem* todoitem;
-            printf("Item =-=-=-=-=-\n");
-            todoitem = todolist->item_list[j];
-            printf("Item name: %s\n", todoitem->item_name);
-            printf("Description: %s\n", todoitem->description);
-            printf("Num of subtasks: %d\n", todoitem->subtask_count);
-
-            for (int k = 0; k < todoitem->subtask_count; k++) {
-                SubTask* subtask;
-                int done;
-
-                subtask = todoitem->subtask_list[k];
-                printf("Subtask: %s, %d\n", subtask->subtask_name, subtask->done);
-            }
-        }
-    }
-}
-
+/* reading */
 Board*
 begin_parse(char* board_path)
 {
@@ -112,7 +84,7 @@ read_file(char* file_name, long* size)
 
     file = fopen(file_name, "r");
     if (file == NULL) {
-        printf("Something went wrong opening file\n");
+        perror("read_file > fopen");
         return NULL;
     }
 
@@ -189,20 +161,15 @@ exit_todoitem(State* state)
 {
     #define st state->cur_todolist
 
-    TodoList* todolist;
-    TodoItem** item_list;
-
     if (state->cur_todoitem == NULL) return; 
     
     /* append current item to todo list */
-    todolist = state->cur_todolist;
-    item_list = todolist->item_list;
-
     st->item_count += 1;
     st->item_list = realloc(st->item_list, st->item_count*sizeof(TodoItem*));
     st->item_list[st->item_count-1] = state->cur_todoitem;
     state->cur_todoitem = NULL;
 
+    #undef st
 }
 
 void
@@ -349,4 +316,68 @@ void
 syntax(void)
 {
     return;
+}
+
+/* writing */
+int
+begin_write(char* board_path, Board* board)
+{ // TODO, make a backup file of board before write in case it crashes
+
+    FILE* file;
+
+    file = fopen(board_path, "w+");
+    if (file == NULL) {
+        perror("begin_write > fopen");
+        return -1;
+    }
+
+    for (int i = 0; i < board->todolist_count; i++) {
+        TodoList* cur_todolist = board->todolist_list[i];
+
+        fprintf(file, "## %s\n", cur_todolist->list_name);
+
+        for (int j = 0; j < cur_todolist->item_count; j++) {
+            TodoItem* cur_todoitem = cur_todolist->item_list[j];
+
+            fprintf(file, "### %s\n", cur_todoitem->item_name);
+            
+            // write the other fields later!!!
+
+        }
+
+    }
+
+    fclose(file);
+
+    return 0;
+}
+
+/* others */
+void
+log_todo(Board* board)
+{
+    for (int i = 0; i < board->todolist_count; i++) {
+        TodoList* todolist;
+        printf("List =-=-=-=-=-==-=-=-=-=-=-\n");
+        todolist = board->todolist_list[i];
+        printf("List name: %s\n", todolist->list_name);
+        printf("Num of items: %d\n", todolist->item_count);
+
+        for (int j = 0; j < todolist->item_count; j++) {
+            TodoItem* todoitem;
+            printf("Item =-=-=-=-=-\n");
+            todoitem = todolist->item_list[j];
+            printf("Item name: %s\n", todoitem->item_name);
+            printf("Description: %s\n", todoitem->description);
+            printf("Num of subtasks: %d\n", todoitem->subtask_count);
+
+            for (int k = 0; k < todoitem->subtask_count; k++) {
+                SubTask* subtask;
+                int done;
+
+                subtask = todoitem->subtask_list[k];
+                printf("Subtask: %s, %d\n", subtask->subtask_name, subtask->done);
+            }
+        }
+    }
 }

@@ -169,13 +169,24 @@ main(int argc, char** argv)
                 
                 break;
             case BINDING_WRITE:
+                {
+                    Board* writeboard;
+
+                    writeboard = boardmenu_to_board(boardmenu);
+
+                    /* mvprintw(30, 5, "%s", writeboard->todolist_list[0]->list_name); */
+                    begin_write(boardfile_name, writeboard);
+
+                    /* now free the writeborad */
+
+                }
+
                 break;
         }
 
         for (int i = 0; i < boardmenu->menu_count; i++) {
             render_menu(boardmenu->menu_list[i]);
         }
-
 
     }
 
@@ -199,9 +210,12 @@ create_board_menu(Board* board)
 
 Board*
 boardmenu_to_board(BoardMenu* boardmenu)
-{
-    Board newboard = malloc(sizeof(Board));
-    TodoList** todolist_list = malloc(sizeof(TodoList*));
+{ // STRINGS are sharing the same address as the one in MENU
+  // and MENUITEM, this may break something if u free this board
+  // consider copying the string
+
+    Board* newboard = malloc(sizeof(Board));
+    TodoList** new_todolist_list = malloc(sizeof(TodoList*));
 
     for (int i = 0; i < boardmenu->menu_count; i++) {
         Menu* curmenu = boardmenu->menu_list[i];
@@ -211,15 +225,28 @@ boardmenu_to_board(BoardMenu* boardmenu)
         new_todolist->list_name = get_menu_name(curmenu);
         new_todolist->item_count = get_menu_length(curmenu);
 
-        /* for (int j = 0; j < get_menu_length(curmenu); j++) { */
+        for (int j = 0; j < get_menu_length(curmenu); j++) {
+            MenuItem* curmenuitem = get_menu_item(curmenu, j);
+
+            TodoItem* new_todoitem = malloc(sizeof(TodoItem));
+
+            new_todoitem->item_name = get_menuitem_title(curmenuitem);
+            new_todoitem->description = get_menuitem_descrip(curmenuitem);
+            new_todoitem->due = 0; //TEMP! 
+            new_todoitem->subtask_list = 0; //TEMP!
+            new_todoitem->subtask_count = 0; //TEMP!
+
+            item_list[j] = new_todoitem;
              
-        /* } */
+        }
 
         new_todolist->item_list = item_list;
+        
+        new_todolist_list[i] = new_todolist;
 
     }
 
-    newboard->todolist_list = todolist_list;
+    newboard->todolist_list = new_todolist_list;
     newboard->todolist_count = boardmenu->menu_count;
 
     return newboard;
@@ -317,7 +344,7 @@ swap_menu(BoardMenu* boardmenu, int src_index, int dest_index)
     clear();
 
     /* swap in array */
-    ar_swap_item(boardmenu->menu_list, src_index, dest_index);
+    ar_swap_item((void*)boardmenu->menu_list, src_index, dest_index);
 
     return 0;
 }

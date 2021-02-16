@@ -8,6 +8,10 @@
 #include <assert.h>
 #include <md4c.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum SubTaskState {
     SubTaskState_todo,
     SubTaskState_done
@@ -39,8 +43,11 @@ typedef struct Board {
 } Board;
 
 extern Board* begin_parse(char* board_path);
-extern int begin_write(Board* Board);
-
+extern int begin_write(char* board_path, Board* board);
 extern void log_todo(Board* board);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

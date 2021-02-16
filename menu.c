@@ -17,7 +17,7 @@
 #define MAX_CONTENTS_LENGTH 256
 
 typedef struct MenuItem {
-    char* contents;
+    char* title;
     char* description;
 } MenuItem;
 
@@ -44,12 +44,13 @@ MenuItem* create_blank_menuitem(void);
 
 
 MenuItem*
-create_menuitem(char* contents)
+create_menuitem(char* title)
 {
     MenuItem* new_menuitem;
 
     new_menuitem = malloc(sizeof(MenuItem));
-    new_menuitem->contents = contents;
+    new_menuitem->title = title;
+    new_menuitem->description = 0; //TEMP FOR NOW
 
     return new_menuitem;
 }
@@ -77,12 +78,59 @@ create_menu(char* menu_name, MenuItem** item_list)
     return new_menu;
 }
 
+/* getters */
 WINDOW*
 get_menu_win(Menu* menu)
 {
     return menu->menu_win;
 }
 
+WINDOW*
+get_menu_subwin(Menu* menu)
+{
+    return menu->sub_win;
+}
+
+MenuItem*
+get_menu_item(Menu* menu, int index)
+{
+    if (index < 0 || index >= menu->menu_length) return NULL;
+
+    return menu->menu_items[index];
+}
+
+int
+get_selected_item(Menu* menu)
+{
+    return menu->selected_item;
+}
+
+int
+get_menu_length(Menu* menu)
+{
+    return menu->menu_length;
+}
+
+char*
+get_menu_name(Menu* menu)
+{
+    return menu->menu_name;
+}
+
+char*
+get_menuitem_title(MenuItem* menuitem)
+{
+    return menuitem->title;
+}
+
+char*
+get_menuitem_descrip(MenuItem* menuitem)
+{
+    return menuitem->description;
+}
+
+
+/* setters */
 int
 set_menu_win(Menu* menu, WINDOW* win)
 {
@@ -105,18 +153,12 @@ set_menu_win(Menu* menu, WINDOW* win)
     return 0;
 }
 
-WINDOW*
-get_menu_subwin(Menu* menu)
+int
+set_selected_item(Menu* menu, int selected_item)
 {
-    return menu->sub_win;
-}
+    menu->selected_item = selected_item;
 
-MenuItem*
-get_menu_item(Menu* menu, int index)
-{
-    if (index < 0 || index >= menu->menu_length) return NULL;
-
-    return menu->menu_items[index];
+    return 0;
 }
 
 int
@@ -127,36 +169,11 @@ set_menu_focus(Menu* menu, bool focus)
     return 0;
 }
 
-int
-get_selected_item(Menu* menu)
-{
-    return menu->selected_item;
-}
-
-int
-set_selected_item(Menu* menu, int selected_item)
-{
-    menu->selected_item = selected_item;
-
-    return 0;
-}
-
-int
-get_menu_length(Menu* menu)
-{
-    return menu->menu_length;
-}
-
-char*
-get_menu_name(Menu* menu)
-{
-    return menu->menu_name;
-}
 
 int
 swap_item(Menu* menu, int src_index, int dest_index)
 {
-    ar_swap_item(menu->menu_items, src_index, dest_index);
+    ar_swap_item((void**)menu->menu_items, src_index, dest_index);
 
     return 0;
 }
@@ -219,7 +236,7 @@ menu_insert_mode(Menu* menu, int insert_index)
     curs_on();
 
     /* move cursor to right spot */
-    ungetstr(menu->menu_items[insert_index]->contents);
+    ungetstr(menu->menu_items[insert_index]->title);
     mvwgetnstr(menu->sub_win,
         insert_index, // account for wrap later too
         0,
@@ -230,7 +247,7 @@ menu_insert_mode(Menu* menu, int insert_index)
 
     /* copy out */
     new_contents = strdup(temp);
-    menu->menu_items[insert_index]->contents = new_contents;
+    menu->menu_items[insert_index]->title = new_contents;
 
     /* delete if empty - maybe move this to a cleanup stage */
     if (strlen(new_contents) == 0) {
@@ -325,7 +342,7 @@ render_menu(Menu* menu)
         char* wrapped_text;
         
         /* wrap text by inserting newlines (maxwidth-1 for newline char)*/
-        wrapped_text = wrap_text(menu->menu_items[i]->contents, menu->max_width-1, &wrapped_lines); 
+        wrapped_text = wrap_text(menu->menu_items[i]->title, menu->max_width-1, &wrapped_lines); 
 
         /* color selected item */
         wattron(menu->sub_win, COLOR_PAIR(
