@@ -341,7 +341,21 @@ begin_write(char* board_path, Board* board)
 
             fprintf(file, "### %s\n", cur_todoitem->item_name);
             
-            // write the other fields later!!!
+            /* bug rn, for some reason date is being written as description too */
+            if (strlen(cur_todoitem->description) > 0) {
+                fprintf(file, "> %s\n", cur_todoitem->description);
+            }
+            if (strlen(cur_todoitem->due) > 0) {
+                fprintf(file, "**%s**\n", cur_todoitem->due);
+            }
+
+            for (int k = 0; k < cur_todoitem->subtask_count; k++) {
+                SubTask* cursubtask = cur_todoitem->subtask_list[k];
+
+                char done_char = (cursubtask->done == SubTaskState_done) ? 'X' : ' ';
+                fprintf(file, "- [%c] %s\n", done_char, cursubtask->subtask_name);
+
+            }
 
         }
 
@@ -399,6 +413,13 @@ free_board(Board* board)
             /* free(cur_todoitem->due); */
 
             /* free subtask later too */
+            for (int k = 0; k < cur_todoitem->subtask_count; k++) {
+                SubTask* cur_subtask = cur_todoitem->subtask_list[k];
+
+                /* free(cur_subtask->subtask_name); */
+                free(cur_subtask);
+                
+            }
 
             free(cur_todoitem);
         }

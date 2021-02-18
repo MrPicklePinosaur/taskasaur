@@ -160,14 +160,25 @@ boardmenu_to_board(BoardMenu* boardmenu)
 
         for (int j = 0; j < get_menu_length(curmenu); j++) {
             MenuItem* curmenuitem = get_menu_item(curmenu, j);
+            TodoItem* itemdata = get_menuitem_userdata(curmenuitem);
 
             TodoItem* new_todoitem = malloc(sizeof(TodoItem));
+            SubTask** new_subtask_list = malloc(itemdata->subtask_count*sizeof(SubTask*));
 
             new_todoitem->item_name = strdup(get_menuitem_title(curmenuitem));
-            new_todoitem->description = strdup(get_menuitem_descrip(curmenuitem));
-            new_todoitem->due = strdup(""); //TEMP! 
-            new_todoitem->subtask_list = malloc(0); //TEMP!
-            new_todoitem->subtask_count = 0; //TEMP!
+            new_todoitem->description = strdup(itemdata->description);
+            new_todoitem->due = strdup(itemdata->due);
+            new_todoitem->subtask_count = itemdata->subtask_count;
+            for (int k = 0; k < itemdata->subtask_count; k++) {
+                SubTask* new_subtask = malloc(sizeof(SubTask));
+
+                new_subtask->subtask_name = itemdata->subtask_list[k]->subtask_name;
+                new_subtask->done = itemdata->subtask_list[k]->done;
+
+                new_subtask_list[k] = new_subtask;
+            }
+
+            new_todoitem->subtask_list = new_subtask_list;
 
             new_item_list[j] = new_todoitem;
         }
@@ -245,17 +256,27 @@ update_menuitem_descrip(MenuItem* menuitem)
 
     if (strlen(item_data->description) > 0) {
         /* strcat(new_descrip, "☰ "); */
-        strcat(new_descrip, "~ ");
+        strcat(new_descrip, "# ");
     }
     if (strlen(item_data->due) > 0) {
         strcat(new_descrip, item_data->due);
         strcat(new_descrip, " ");
     }
     if (item_data->subtask_count > 0) {
+
+        int tasks_complete = 0;
+        for (int i = 0; i < item_data->subtask_count; i++) {
+            if (item_data->subtask_list[i]->done == SubTaskState_done) {
+                tasks_complete += 1;
+            }
+        }
+
         /* [, # done, /, # total, ], null */
-        int substask_len = 1+item_data->subtask_count+1+  1+1;
+        char subtask_done[4]; // assume there wont be more than 999 subtasks (possibly danger?)
+        snprintf(subtask_done, 4, "%d", tasks_complete);
+        int substask_len = 1+item_data->subtask_count+1+strlen(subtask_done)+1+1;
         char subtask_text[substask_len];
-        sprintf(subtask_text, "[%d/]", item_data->subtask_count);
+        sprintf(subtask_text, "[%s/%d]", subtask_done, item_data->subtask_count);
         strcat(new_descrip, subtask_text);
     }
 
