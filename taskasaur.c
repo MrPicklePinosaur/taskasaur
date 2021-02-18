@@ -5,6 +5,8 @@
 #include "headers/utils.h"
 #include "config.h"
 
+void render_step(BoardMenu* boardmenu);
+
 int
 main(int argc, char** argv)
 {
@@ -22,10 +24,8 @@ main(int argc, char** argv)
     BoardMenu* boardmenu;
     boardmenu = create_board_menu(board);
 
-    // this is temp
-    for (int i = 0; i < boardmenu->menu_count; i++) {
-        render_menu(boardmenu->menu_list[i]);
-    }
+    /* need to render before user presses anything */
+    render_step(boardmenu);
 
     char ch;
     while ((ch = getch()) != BINDING_QUIT) {
@@ -163,9 +163,7 @@ main(int argc, char** argv)
                 break;
         }
 
-        for (int i = 0; i < boardmenu->menu_count; i++) {
-            render_menu(boardmenu->menu_list[i]);
-        }
+        render_step(boardmenu);
 
     }
 
@@ -173,3 +171,18 @@ main(int argc, char** argv)
     return 0;    
 }
 
+void
+render_step(BoardMenu* boardmenu)
+{
+        for (int i = 0; i < boardmenu->menu_count; i++) {
+
+            Menu* curmenu = boardmenu->menu_list[i];
+
+            /* update the descriptions - maybe not do this here */ 
+            for (int j = 0; j < get_menu_length(curmenu); j++) {
+                update_menuitem_descrip(get_menu_item(curmenu, j));
+            }
+
+            render_menu(curmenu);
+        }
+}

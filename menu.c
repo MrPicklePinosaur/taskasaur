@@ -19,7 +19,7 @@
 typedef struct MenuItem {
     char* title;
     char* description;
-    void* user_data;
+    void* userdata;
 } MenuItem;
 
 typedef struct Menu {
@@ -33,7 +33,7 @@ typedef struct Menu {
     WINDOW* sub_win;
     int max_height;
     int max_width;
-    void* user_data;
+    void* userdata;
 } Menu;
 
 int swap_item(Menu* menu, int src_index, int dest_index);
@@ -119,6 +119,12 @@ get_menu_name(Menu* menu)
     return menu->menu_name;
 }
 
+void*
+get_menu_userdata(Menu* menu)
+{
+    return menu->userdata;
+}
+
 char*
 get_menuitem_title(MenuItem* menuitem)
 {
@@ -129,6 +135,12 @@ char*
 get_menuitem_descrip(MenuItem* menuitem)
 {
     return menuitem->description;
+}
+
+void*
+get_menuitem_userdata(MenuItem* menuitem)
+{
+    return menuitem->userdata;
 }
 
 
@@ -159,7 +171,6 @@ int
 set_selected_item(Menu* menu, int selected_item)
 {
     menu->selected_item = selected_item;
-
     return 0;
 }
 
@@ -167,7 +178,27 @@ int
 set_menu_focus(Menu* menu, bool focus)
 {
     menu->focused = focus;
-    
+    return 0;
+}
+
+int
+set_menu_userdata(Menu* menu, void* userdata)
+{
+    menu->userdata = userdata;
+    return 0;
+}
+
+int
+set_menuitem_descrip(MenuItem* menuitem, char* descrip)
+{
+    menuitem->description = descrip;
+    return 0;
+}
+
+int
+set_menuitem_userdata(MenuItem* menuitem, void* userdata)
+{
+    menuitem->userdata = userdata;
     return 0;
 }
 
@@ -339,12 +370,15 @@ render_menu(Menu* menu)
     /* draw inner menu */
     int cur_line = 0;
     for (int i = 0; i < menu->menu_length-menu->scroll_offset; i++) {
-
+        
+        MenuItem* curitem;
         int wrapped_lines;
         char* wrapped_text;
+
+        curitem = menu->menu_items[i];
         
         /* wrap text by inserting newlines (maxwidth-1 for newline char)*/
-        wrapped_text = wrap_text(menu->menu_items[i]->title, menu->max_width-1, &wrapped_lines); 
+        wrapped_text = wrap_text(curitem->title, menu->max_width-1, &wrapped_lines); 
 
         /* color selected item */
         wattron(menu->sub_win, COLOR_PAIR(
@@ -357,7 +391,10 @@ render_menu(Menu* menu)
         cur_line += wrapped_lines;
 
         /* display number of items */
-        /* if (menu->menu_items[i]->) */
+        if (strlen(curitem->description) > 0) {
+            mvwprintw(menu->sub_win, cur_line, 0, curitem->description); 
+            cur_line += 1;
+        }
 
         free(wrapped_text);
 

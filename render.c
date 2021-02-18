@@ -129,7 +129,12 @@ todolist_to_menuitem(TodoItem** item_list, int list_length)
 
     items = malloc((list_length+1)*sizeof(MenuItem*));
     for (int i = 0; i < list_length; i++) {
-        items[i] = create_menuitem(item_list[i]->item_name);
+        MenuItem* new_menuitem;
+        new_menuitem =  create_menuitem(item_list[i]->item_name);
+        /* using same struct, careful if it gets freed */
+        set_menuitem_userdata(new_menuitem, item_list[i]);
+
+        items[i] = new_menuitem;
     }
 
     items[list_length] = 0; //null terminate
@@ -227,6 +232,42 @@ swap_menu(BoardMenu* boardmenu, int src_index, int dest_index)
     return 0;
 }
 
+/* menuitem */
+int
+update_menuitem_descrip(MenuItem* menuitem)
+{ /* need to do something about colored text */
+
+    TodoItem* item_data;    
+    char* new_descrip;
+
+    item_data = (TodoItem*)get_menuitem_userdata(menuitem);
+    new_descrip = strdup("");
+
+    if (strlen(item_data->description) > 0) {
+        /* strcat(new_descrip, "☰ "); */
+        strcat(new_descrip, "~ ");
+    }
+    if (strlen(item_data->due) > 0) {
+        strcat(new_descrip, item_data->due);
+        strcat(new_descrip, " ");
+    }
+    if (item_data->subtask_count > 0) {
+        /* [, # done, /, # total, ], null */
+        int substask_len = 1+item_data->subtask_count+1+  1+1;
+        char subtask_text[substask_len];
+        sprintf(subtask_text, "[%d/]", item_data->subtask_count);
+        strcat(new_descrip, subtask_text);
+    }
+
+    /* free old string */
+    if (strlen(new_descrip) > 0) {
+        free(get_menuitem_descrip(menuitem));
+        set_menuitem_descrip(menuitem, new_descrip); 
+    }
+
+    return 0;
+}
+
 /* popup */
 WINDOW*
 create_popup_win()
@@ -234,7 +275,7 @@ create_popup_win()
     return NULL;
 }
 
-
+/* helpers */
 int
 ungetstr(char* str)
 {

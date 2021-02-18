@@ -39,6 +39,9 @@ extern Board* boardmenu_to_board(BoardMenu* boardmenu);
 extern int set_selected_menu(BoardMenu* boardmenu, int index);
 extern int swap_menu(BoardMenu* boardmenu, int src_index, int dest_index);
 
+/* menuitem stuff */
+extern int update_menuitem_descrip(MenuItem* menuitem);
+
 /* popup menu for menu item */
 extern WINDOW* create_popup_win();
 

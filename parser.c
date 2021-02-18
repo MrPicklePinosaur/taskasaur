@@ -147,8 +147,8 @@ enter_todoitem(State* state, char* item_name)
 
     new_todoitem = malloc(sizeof(TodoItem));
     new_todoitem->item_name = item_name;
-    new_todoitem->description = NULL;
-    new_todoitem->due = NULL;
+    new_todoitem->description = strdup("");
+    new_todoitem->due = strdup("");
     new_todoitem->subtask_list = malloc(0);
     new_todoitem->subtask_count = 0;
 
@@ -181,7 +181,7 @@ set_description(State* state, char* description)
 void
 set_due(State* state, char* due)
 {
-
+    state->cur_todoitem->due = due;
 }
 
 void
@@ -281,7 +281,7 @@ leave_span(MD_SPANTYPE type, void* detail, void* userdata)
     
     switch (type) {
         case MD_SPAN_STRONG:
-            printf("date, %s\n", state->last_block_text);
+            set_due(state, state->last_block_text);
             break;
     }
     return 0;
