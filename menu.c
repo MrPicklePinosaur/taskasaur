@@ -230,8 +230,6 @@ delete_item(Menu* menu, int index)
         menu->selected_item = menu->menu_length-1;
     }
 
-    wclear(menu->sub_win);
-
     return 0;
 }
 
@@ -261,10 +259,6 @@ menu_insert_mode(Menu* menu, int insert_index)
 {
     char temp[MAX_CONTENTS_LENGTH+1]; // remember null
     char* new_contents;
-
-    /* this is bad */
-    wclear(menu->sub_win);
-    render_menu(menu);
 
     curs_on();
 
@@ -357,9 +351,7 @@ int
 render_menu(Menu* menu)
 {
     /* draw outer menu (prob dont need this every render) */ 
-    int menu_header_color;
-
-    /* menu_header_color = */ 
+    /* wclear(menu->menu_win); */
     wattron(menu->menu_win, COLOR_PAIR(
         (menu->focused == true) ?
         TS_MENU_SELECTED: TS_MENU_NONSELECTED       
@@ -368,6 +360,8 @@ render_menu(Menu* menu)
     wattroff(menu->menu_win, COLOR_PAIR(0));
 
     /* draw inner menu */
+    wclear(menu->sub_win);
+
     int cur_line = 0;
     for (int i = 0; i < menu->menu_length-menu->scroll_offset; i++) {
         

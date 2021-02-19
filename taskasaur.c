@@ -6,6 +6,7 @@
 #include "config.h"
 
 void render_step(BoardMenu* boardmenu);
+void save_to_file(char* filepath, BoardMenu* boardmenu);
 
 int
 main(int argc, char** argv)
@@ -27,7 +28,7 @@ main(int argc, char** argv)
     /* need to render before user presses anything */
     render_step(boardmenu);
 
-    char ch;
+    int ch;
     while ((ch = getch()) != BINDING_QUIT) {
 
         Menu* active_menu;
@@ -149,23 +150,28 @@ main(int argc, char** argv)
                 menu_driver(active_menu, MENU_EDIT);
                 break;
             case BINDING_SELECT:
-                
                 break;
             case BINDING_WRITE:
-                {
-                    Board* writeboard;
-                    writeboard = boardmenu_to_board(boardmenu);
+                save_to_file(boardfile_name, boardmenu);
+                break;
+            case KEY_RESIZE:
+                /* ; */
+                /* int y, x; */
+                /* char out[10]; */
+                /* getmaxyx(stdscr, y, x); */
+                /* sprintf(out, "%d,%d", y, x); */
 
-                    begin_write(boardfile_name, writeboard);
-                    free_board(writeboard);
-                }
-
+                /* mvprintw(20, 20, out); */
+                /* resize_term(y, x); */
                 break;
         }
 
         render_step(boardmenu);
 
     }
+    
+    /* save on exit - this causes weird stuff to happen, maybe it's not given enough time to write before program exits? */
+    /* save_to_file(boardfile_name, boardmenu); */
 
     exit_tscurses();
     return 0;    
@@ -185,4 +191,14 @@ render_step(BoardMenu* boardmenu)
 
             render_menu(curmenu);
         }
+}
+
+void
+save_to_file(char* filepath, BoardMenu* boardmenu)
+{
+    Board* writeboard;
+    writeboard = boardmenu_to_board(boardmenu);
+
+    begin_write(filepath, writeboard);
+    free_board(writeboard);
 }
