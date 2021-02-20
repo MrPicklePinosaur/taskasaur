@@ -49,10 +49,20 @@ MenuItem*
 create_menuitem(char* title)
 {
     MenuItem* new_menuitem;
+    TodoItem* new_userdata;
 
     new_menuitem = malloc(sizeof(MenuItem));
     new_menuitem->title = title;
     new_menuitem->description = strdup(""); //TEMP FOR NOW
+
+    new_userdata = malloc(sizeof(TodoItem));
+    new_userdata->item_name = title;
+    new_userdata->description = strdup("");
+    new_userdata->due = strdup("");
+    new_userdata->subtask_list = malloc(0);
+    new_userdata->subtask_count = 0;
+    
+    new_menuitem->userdata = new_userdata;
 
     return new_menuitem;
 }
