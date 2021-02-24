@@ -44,6 +44,10 @@ int menu_insert_mode(Menu* menu, int insert_index);
 /* prob temp for now */
 MenuItem* create_blank_menuitem(void);
 
+/* rendering stuff */
+int render_item(Menu* menu, int item_index, int start_y);
+int item_height(MenuItem* menuitem);
+int items_visible(Menu* menu);
 
 MenuItem*
 create_menuitem(char* title)
@@ -369,45 +373,90 @@ render_menu(Menu* menu)
     mvwprintw(menu->menu_win, 0, MENU_PAD_LEFT, menu->menu_name);
     wattroff(menu->menu_win, COLOR_PAIR(0));
 
+    /* char buf[20]; */
+    /* sprintf(buf, "%d", items_visible(menu)); */
+    /* mvprintw(20, 20, buf); */
+
+    /* calculate scroll */
+    int visible;
+
+    visible = items_visible(menu);
+
+    if (menu->selected_item > menu->scroll_offset+visible) {
+        // may be dangerous, assumes render after every action
+        menu->scroll_offset += 1;
+    } else if (menu->selected_item < menu->scroll_offset) {
+        menu->scroll_offset -= 1;
+    }
+
     /* draw inner menu */
     wclear(menu->sub_win);
 
-    int cur_line = 0;
-    for (int i = 0; i < menu->menu_length-menu->scroll_offset; i++) {
-        
-        MenuItem* curitem;
-        int wrapped_lines;
-        char* wrapped_text;
-
-        curitem = menu->menu_items[i];
-        
-        /* wrap text by inserting newlines (maxwidth-1 for newline char)*/
-        wrapped_text = wrap_text(curitem->title, menu->max_width-1, &wrapped_lines); 
-
-        /* color selected item */
-        wattron(menu->sub_win, COLOR_PAIR(
-           (i == menu->selected_item && menu->focused == true) ? 
-           TS_SELECTED : TS_NONSELECTED
-        ));
-        mvwprintw(menu->sub_win, cur_line, 0, wrapped_text);
-        wattroff(menu->sub_win, COLOR_PAIR(0));
-
-        cur_line += wrapped_lines;
-
-        /* display number of items */
-        if (strlen(curitem->description) > 0) {
-            mvwprintw(menu->sub_win, cur_line, 0, curitem->description); 
-            cur_line += 1;
-        }
-
-        free(wrapped_text);
-
+    int curline = 0;
+    for (int i = menu->scroll_offset; i < menu->menu_length; i++) {
+        curline += render_item(menu, i, curline);
     }
 
     wrefresh(menu->sub_win);
     wrefresh(menu->menu_win);
 
     return 0;
+}
+
+int
+render_item(Menu* menu, int item_index, int start_y)
+{
+    MenuItem* curitem;
+    curitem = menu->menu_items[item_index];
+
+    /* color selected item */
+    wattron(menu->sub_win, COLOR_PAIR(
+       (item_index == menu->selected_item && menu->focused == true) ? 
+       TS_SELECTED : TS_NONSELECTED
+    ));
+    mvwprintw(menu->sub_win, start_y, 0, curitem->title);
+    wattroff(menu->sub_win, COLOR_PAIR(0));
+
+    /* display number of items */
+    if (strlen(curitem->description) > 0) {
+        mvwprintw(menu->sub_win, start_y+1, 0, curitem->description); 
+    }
+
+    return item_height(curitem);
+}
+
+int
+item_height(MenuItem* menuitem)
+{
+    int lines;
+
+    lines = 1;
+    if (strlen(menuitem->description) > 0) {
+        lines += 1;
+    }
+
+    return lines;
+}
+
+int
+items_visible(Menu* menu)
+{
+    int maxheight;
+    int maxwidth; // unused
+
+    getmaxyx(menu->sub_win, maxheight, maxwidth);
+
+    int i = menu->scroll_offset;
+    int lines = 0;
+    for (; i < menu->menu_length; i++) {
+
+        lines += item_height(menu->menu_items[i]);
+
+        if (lines >= maxheight) break;
+
+    }
+
+    return i;
 }
 
 int

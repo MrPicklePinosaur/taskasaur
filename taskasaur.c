@@ -68,8 +68,8 @@ main(int argc, char** argv)
                     Menu* from_menu;
                     Menu* to_menu;
 
-                    from_menu = boardmenu->menu_list[boardmenu->selected],
-                    to_menu = boardmenu->menu_list[boardmenu->selected-1],
+                    from_menu = boardmenu->menu_list[boardmenu->selected];
+                    to_menu = boardmenu->menu_list[boardmenu->selected-1];
 
                     insert_item(
                         to_menu,
@@ -97,8 +97,8 @@ main(int argc, char** argv)
                     Menu* from_menu;
                     Menu* to_menu;
 
-                    from_menu = boardmenu->menu_list[boardmenu->selected],
-                    to_menu = boardmenu->menu_list[boardmenu->selected+1],
+                    from_menu = boardmenu->menu_list[boardmenu->selected];
+                    to_menu = boardmenu->menu_list[boardmenu->selected+1];
 
                     insert_item(
                         to_menu,
