@@ -273,13 +273,20 @@ menu_insert_mode(Menu* menu, int insert_index)
 {
     char temp[MAX_CONTENTS_LENGTH+1]; // remember null
     char* new_contents;
+    int insert_pos;
 
     curs_on();
+
+    // account for multiline items
+    insert_pos = menu->scroll_offset;
+    for (int i = 0; i < insert_index; i++) {
+        insert_pos += item_height(menu->menu_items[i]);
+    }
 
     /* move cursor to right spot */
     ungetstr(menu->menu_items[insert_index]->title);
     mvwgetnstr(menu->sub_win,
-        insert_index, // account for wrap later too
+        insert_pos, 
         0,
         temp,
         MAX_CONTENTS_LENGTH
@@ -337,16 +344,19 @@ menu_driver(Menu* menu, MenuAction action)
 
         case MENU_APPEND:
             insert_item(menu, create_blank_menuitem(), menu->menu_length);
+            render_menu(menu); // refresh after inserting
             menu_insert_mode(menu, menu->selected_item);
             break;
 
         case MENU_INSERT_ABOVE:
             insert_item(menu, create_blank_menuitem(), menu->selected_item);
+            render_menu(menu);
             menu_insert_mode(menu, menu->selected_item);
             break;
 
         case MENU_INSERT_BELOW:
             insert_item(menu, create_blank_menuitem(), menu->selected_item+1);
+            render_menu(menu);
             menu_insert_mode(menu, menu->selected_item); // inserted item is cur now
             break;
 
@@ -386,7 +396,8 @@ render_menu(Menu* menu)
         // may be dangerous, assumes render after every action
         menu->scroll_offset += 1;
     } else if (menu->selected_item < menu->scroll_offset) {
-        menu->scroll_offset -= 1;
+        menu->scroll_offset = menu->scroll_offset-1;
+        if (menu->scroll_offset < 0) menu->scroll_offset = 0;
     }
 
     /* draw inner menu */

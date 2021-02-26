@@ -1,7 +1,7 @@
 
 CC=gcc
-CFLAGS=-g -Wall -Wno-unused-variable -Wno-switch
-LIBS=-lncursesw -lmd4c
+CFLAGS=-g -Wall -Wno-unused-variable -Wno-unused-but-set-variable -Wno-switch
+LIBS=-ltinfo -lncurses -lmd4c
 
 make: taskasaur
 

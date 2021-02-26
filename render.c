@@ -211,6 +211,7 @@ set_selected_menu(BoardMenu* boardmenu, int index)
     /* also try to jump to a similar position if possible */
     /* rn theres a bug if old menu is empty */
     new_pos = min(get_selected_item(old_menu), get_menu_length(new_menu)-1);
+    if (new_pos < 0) new_pos = 0;
     set_selected_item(new_menu, new_pos);
 
     boardmenu->selected = index;

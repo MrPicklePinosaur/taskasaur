@@ -64,6 +64,7 @@ main(int argc, char** argv)
                 break;
             case BINDING_MOVE_ITEM_LEFT:
                 if (boardmenu->selected-1 < 0) break;
+                if (get_menu_length(boardmenu->menu_list[boardmenu->selected]) == 0) break;
                 {
                     Menu* from_menu;
                     Menu* to_menu;
@@ -92,6 +93,7 @@ main(int argc, char** argv)
                 break;
             case BINDING_MOVE_ITEM_RIGHT:
                 if (boardmenu->selected >= boardmenu->menu_count-1) break;
+                if (get_menu_length(boardmenu->menu_list[boardmenu->selected]) == 0) break;
                 // this is legit cpy paste please fix this
                 {
                     Menu* from_menu;
