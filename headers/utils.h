@@ -19,6 +19,8 @@ array_length(type, array)               \
 })
 
 extern int min(int a, int b);
+extern int clamp(int v, int min, int max);
+extern int floorzero(int v);
 
 extern char* wrap_text(char* str, int max_width, int* lines);
 

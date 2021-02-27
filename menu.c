@@ -10,7 +10,7 @@
 #include "headers/utils.h"
 
 #define MENU_PAD_TOP 2
-#define MENU_PAD_BOTTOM 1
+#define MENU_PAD_BOTTOM 2
 #define MENU_PAD_LEFT 2
 #define MENU_PAD_RIGHT 1
 
@@ -47,7 +47,8 @@ MenuItem* create_blank_menuitem(void);
 /* rendering stuff */
 int render_item(Menu* menu, int item_index, int start_y);
 int item_height(MenuItem* menuitem);
-int items_visible(Menu* menu);
+int items_visible(Menu* menu, int offset);
+int items_visible_rev(Menu* menu, int offset);
 
 MenuItem*
 create_menuitem(char* title)
@@ -383,25 +384,35 @@ render_menu(Menu* menu)
     mvwprintw(menu->menu_win, 0, MENU_PAD_LEFT, menu->menu_name);
     wattroff(menu->menu_win, COLOR_PAIR(0));
 
-    /* char buf[20]; */
-    /* sprintf(buf, "%d", items_visible(menu)); */
-    /* mvprintw(20, 20, buf); */
+    /* draw inner menu */
+    wclear(menu->sub_win);
 
     /* calculate scroll */
     int visible;
 
-    visible = items_visible(menu);
+    visible = items_visible(menu, menu->scroll_offset);
 
-    if (menu->selected_item > menu->scroll_offset+visible) {
-        // may be dangerous, assumes render after every action
-        menu->scroll_offset += 1;
+    if (menu->selected_item >= menu->scroll_offset+visible) {
+        menu->scroll_offset = clamp(
+            menu->selected_item-items_visible_rev(menu, menu->selected_item)+1,
+            0,
+            floorzero(menu->menu_length-1)
+        );
+
     } else if (menu->selected_item < menu->scroll_offset) {
-        menu->scroll_offset = menu->scroll_offset-1;
-        if (menu->scroll_offset < 0) menu->scroll_offset = 0;
+        menu->scroll_offset = clamp(
+            menu->selected_item,
+            0,
+            floorzero(menu->menu_length-1)
+        );
     }
 
-    /* draw inner menu */
-    wclear(menu->sub_win);
+    /* char abuf[20]; */
+    /* int y; */
+    /* int x; */
+    /* getmaxyx(menu->sub_win, y, x); */
+    /* sprintf(abuf, "%d,%d,%d max:%d,%d", menu->selected_item, visible, menu->scroll_offset,y,x); */
+    /* mvprintw(19, 27, abuf); */
 
     int curline = 0;
     for (int i = menu->scroll_offset; i < menu->menu_length; i++) {
@@ -450,24 +461,45 @@ item_height(MenuItem* menuitem)
 }
 
 int
-items_visible(Menu* menu)
+items_visible(Menu* menu, int offset)
 {
     int maxheight;
     int maxwidth; // unused
 
     getmaxyx(menu->sub_win, maxheight, maxwidth);
 
-    int i = menu->scroll_offset;
+    int vis = 0;
     int lines = 0;
-    for (; i < menu->menu_length; i++) {
+    for (int i = offset ; i < menu->menu_length; i++) {
 
         lines += item_height(menu->menu_items[i]);
-
-        if (lines >= maxheight) break;
+        if (lines > maxheight) break;
+        vis += 1;
 
     }
 
-    return i;
+    return vis;
+}
+
+int
+items_visible_rev(Menu* menu, int offset)
+{
+    int maxheight;
+    int maxwidth; // unused
+
+    getmaxyx(menu->sub_win, maxheight, maxwidth);
+
+    int vis = 0;
+    int lines = 0;
+    for (int i = offset; i > 0; i--) {
+
+        lines += item_height(menu->menu_items[i]);
+        if (lines > maxheight) break;
+        vis +=1;
+
+    }
+
+    return vis;
 }
 
 int

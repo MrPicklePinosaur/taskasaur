@@ -12,6 +12,21 @@ min(int a, int b)
     return (a < b) ? a : b;
 }
 
+int
+clamp(int v, int min, int max)
+{
+    if (v > max) return max;
+    if (v < min) return min;
+    return v;
+}
+
+int
+floorzero(int v)
+{
+    return (v >= 0) ? v : 0;
+}
+
+
 char*
 wrap_text(char* str, int max_width, int* lines)
 {
