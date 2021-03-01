@@ -8,6 +8,7 @@
 char* boardfile_name = "test_board.md"; 
 
 void normal_handleinput(BoardMenu* boardmenu, int ch);
+void popup_handleinput(BoardMenu* boardmenu, int ch);
 
 void normal_renderstep(BoardMenu* boardmenu);
 void popup_renderstep(BoardMenu* boardmenu);
@@ -39,6 +40,7 @@ main(int argc, char** argv)
             normal_handleinput(boardmenu, ch);
             normal_renderstep(boardmenu);
         } else {
+            popup_handleinput(boardmenu, ch);
             popup_renderstep(boardmenu);
         }
 
@@ -208,6 +210,24 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
 }
 
 void
+popup_handleinput(BoardMenu* boardmenu, int ch)
+{
+    Menu* popup_menu;
+
+    popup_menu = boardmenu->popup_menu;
+
+    switch (ch) {
+
+        case BINDING_SCROLL_UP:
+            menu_driver(popup_menu, MENU_UP);
+            break;
+        case BINDING_SCROLL_DOWN:
+            menu_driver(popup_menu, MENU_DOWN);
+            break;
+    }    
+}
+
+void
 normal_renderstep(BoardMenu* boardmenu)
 {
     for (int i = 0; i < boardmenu->menu_count; i++) {
@@ -227,6 +247,8 @@ void
 popup_renderstep(BoardMenu* boardmenu)
 {
     if (boardmenu->popup_menu == NULL) return;
+
+    render_popup_menu(boardmenu->popup_menu); 
 
 }
 

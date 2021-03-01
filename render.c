@@ -298,20 +298,13 @@ make_popup_menu(TodoItem* itemdata)
 {
     MenuItem** subtask_menuitems;
     Menu* new_popup_menu;
+    WINDOW* popup_win;
 
-    /* subtask list */
     subtask_menuitems = subtasklist_to_menuitem(itemdata->subtask_list, itemdata->subtask_count);
     new_popup_menu = create_menu(strdup(""), subtask_menuitems);
 
-    return new_popup_menu;
-}
-
-WINDOW*
-create_popup_win(TodoItem* item_info)
-{
+    /* popup win */
     int maxheight, maxwidth;
-    WINDOW* popup_win;
-
     getmaxyx(stdscr, maxheight, maxwidth);
     popup_win = newwin(
         maxheight-2*POPUP_BORDER,
@@ -320,11 +313,26 @@ create_popup_win(TodoItem* item_info)
         POPUP_BORDER*2
     );
     box(popup_win, 0, 0);
-    
-    refresh();
+
+    set_menu_win(new_popup_menu, popup_win);
+
+    return new_popup_menu;
+}
+
+int
+render_popup_menu(Menu* popup_menu)
+{
+    WINDOW* popup_win;
+
+    popup_win = get_menu_win(popup_menu);
+    wclear(popup_win);
+
+    /* box(popup_win, 0, 0); */
+    render_menu(popup_menu);
+
     wrefresh(popup_win);
 
-    return popup_win;
+    return 0;
 }
 
 /* this is copy paste of other, prob abstract */
