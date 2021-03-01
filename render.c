@@ -84,6 +84,8 @@ create_board_menu(Board* board)
     new_boardmenu->menu_list = make_menus(board, board->todolist_count);
     new_boardmenu->menu_count = board->todolist_count;
     new_boardmenu->selected = 0;
+    new_boardmenu->popup_menu = NULL;
+    new_boardmenu->popup_open = 0;
 
     return new_boardmenu;
 }
@@ -291,10 +293,58 @@ update_menuitem_descrip(MenuItem* menuitem)
 }
 
 /* popup */
-WINDOW*
-create_popup_win()
+Menu*
+make_popup_menu(TodoItem* itemdata)
 {
-    return NULL;
+    MenuItem** subtask_menuitems;
+    Menu* new_popup_menu;
+
+    /* subtask list */
+    subtask_menuitems = subtasklist_to_menuitem(itemdata->subtask_list, itemdata->subtask_count);
+    new_popup_menu = create_menu(strdup(""), subtask_menuitems);
+
+    return new_popup_menu;
+}
+
+WINDOW*
+create_popup_win(TodoItem* item_info)
+{
+    int maxheight, maxwidth;
+    WINDOW* popup_win;
+
+    getmaxyx(stdscr, maxheight, maxwidth);
+    popup_win = newwin(
+        maxheight-2*POPUP_BORDER,
+        maxwidth-2*2*POPUP_BORDER,
+        POPUP_BORDER,
+        POPUP_BORDER*2
+    );
+    box(popup_win, 0, 0);
+    
+    refresh();
+    wrefresh(popup_win);
+
+    return popup_win;
+}
+
+/* this is copy paste of other, prob abstract */
+MenuItem**
+subtasklist_to_menuitem(SubTask** subtask_list, int list_length)
+{
+    MenuItem** items;
+
+    items = malloc((list_length+1)*sizeof(MenuItem*));
+    for (int i = 0; i < list_length; i++) {
+        MenuItem* new_menuitem;
+        new_menuitem =  create_menuitem(subtask_list[i]->subtask_name);
+        /* using same struct, careful if it gets freed */
+        set_menuitem_userdata(new_menuitem, subtask_list[i]);
+
+        items[i] = new_menuitem;
+    }
+
+    items[list_length] = 0; //null terminate
+    return items;
 }
 
 /* helpers */

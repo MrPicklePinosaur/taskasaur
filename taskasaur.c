@@ -5,13 +5,17 @@
 #include "headers/utils.h"
 #include "config.h"
 
-void render_step(BoardMenu* boardmenu);
+char* boardfile_name = "test_board.md"; 
+
+void normal_handleinput(BoardMenu* boardmenu, int ch);
+
+void normal_renderstep(BoardMenu* boardmenu);
+void popup_renderstep(BoardMenu* boardmenu);
 void save_to_file(char* filepath, BoardMenu* boardmenu);
 
 int
 main(int argc, char** argv)
 {
-    char* boardfile_name = "test_board.md"; 
     printf("%c]0;%s - %s%c", '\033', "taskasaur", boardfile_name, '\007'); // need to reset after program exits
 
     /* read from todo file */
@@ -26,149 +30,17 @@ main(int argc, char** argv)
     boardmenu = create_board_menu(board);
 
     /* need to render before user presses anything */
-    render_step(boardmenu);
+    normal_renderstep(boardmenu);
 
     int ch;
     while ((ch = getch()) != BINDING_QUIT) {
 
-        Menu* active_menu;
-        active_menu = boardmenu->menu_list[boardmenu->selected];
-
-        switch (ch) {
-
-            case BINDING_SCROLL_UP:
-                menu_driver(active_menu, MENU_UP);
-                break;
-            case BINDING_SCROLL_DOWN:
-                menu_driver(active_menu, MENU_DOWN);
-                break;
-            case BINDING_SCROLL_LEFT:
-                if (boardmenu->selected-1 < 0) break;
-                set_selected_menu(boardmenu, boardmenu->selected-1);
-                break;
-            case BINDING_SCROLL_RIGHT:
-                if (boardmenu->selected+1 > boardmenu->menu_count-1) break;
-                set_selected_menu(boardmenu, boardmenu->selected+1);
-                break;
-            case BINDING_JUMP_TOP:
-                menu_driver(active_menu, MENU_TOP);
-                break;
-            case BINDING_JUMP_BOTTOM:
-                menu_driver(active_menu, MENU_BOTTOM);
-                break;
-            case BINDING_MOVE_ITEM_UP:
-                menu_driver(active_menu, MENU_MOVE_UP);
-                break;
-            case BINDING_MOVE_ITEM_DOWN:
-                menu_driver(active_menu, MENU_MOVE_DOWN);
-                break;
-            case BINDING_MOVE_ITEM_LEFT:
-                if (boardmenu->selected-1 < 0) break;
-                if (get_menu_length(boardmenu->menu_list[boardmenu->selected]) == 0) break;
-                {
-                    Menu* from_menu;
-                    Menu* to_menu;
-
-                    from_menu = boardmenu->menu_list[boardmenu->selected];
-                    to_menu = boardmenu->menu_list[boardmenu->selected-1];
-
-                    insert_item(
-                        to_menu,
-                        get_menu_item(
-                            from_menu,
-                            get_selected_item(from_menu)
-                        ),
-                        min(
-                            get_selected_item(from_menu),
-                            get_menu_length(to_menu)
-                        )
-                    );
-                    delete_item(
-                        from_menu,
-                        get_selected_item(from_menu) 
-                    );
-                    set_selected_menu(boardmenu, boardmenu->selected-1);
-                }
-
-                break;
-            case BINDING_MOVE_ITEM_RIGHT:
-                if (boardmenu->selected >= boardmenu->menu_count-1) break;
-                if (get_menu_length(boardmenu->menu_list[boardmenu->selected]) == 0) break;
-                // this is legit cpy paste please fix this
-                {
-                    Menu* from_menu;
-                    Menu* to_menu;
-
-                    from_menu = boardmenu->menu_list[boardmenu->selected];
-                    to_menu = boardmenu->menu_list[boardmenu->selected+1];
-
-                    insert_item(
-                        to_menu,
-                        get_menu_item(
-                            from_menu,
-                            get_selected_item(from_menu)
-                        ),
-                        min(
-                            get_selected_item(from_menu),
-                            get_menu_length(to_menu)
-                        )
-                    );
-                    delete_item(
-                        from_menu,
-                        get_selected_item(from_menu) 
-                    );
-                    set_selected_menu(boardmenu, boardmenu->selected+1);
-                }
-
-                break;
-            case BINDING_DELETE_ITEM:
-                menu_driver(active_menu, MENU_DELETE);
-                break;
-            case BINDING_APPEND_ITEM:
-                menu_driver(active_menu, MENU_APPEND);
-                break;
-            case BINDING_INSERT_ABOVE:
-                menu_driver(active_menu, MENU_INSERT_ABOVE);
-                break;
-            case BINDING_INSERT_BELOW:
-                menu_driver(active_menu, MENU_INSERT_BELOW);
-                break;
-            /* case BINDING_MOVE_MENU_LEFT: */
-            /*     if (boardmenu->selected-1 < 0) break; */
-
-            /*     swap_menu(boardmenu, boardmenu->selected, boardmenu->selected-1); */
-                /* boardmenu->selected -= 1; */
-                /* set_selected_menu(boardmenu, boardmenu->selected); */
-
-                /* break; */
-            /* case BINDING_MOVE_MENU_RIGHT: */
-                /* if (boardmenu->selected >= boardmenu->menu_count-1) break; */
-                /* swap_menu(boardmenu, boardmenu->selected, boardmenu->selected+1); */
-                /* boardmenu->selected += 1; */
-                /* set_selected_menu(boardmenu, boardmenu->selected); */
-
-                /* break; */
-            case BINDING_EDIT_ITEM:
-                menu_driver(active_menu, MENU_EDIT);
-                break;
-            case BINDING_SELECT:
-                break;
-            case BINDING_WRITE:
-                save_to_file(boardfile_name, boardmenu);
-                break;
-            case KEY_RESIZE:
-                /* ; */
-                /* int y, x; */
-                /* char out[10]; */
-                /* getmaxyx(stdscr, y, x); */
-                /* sprintf(out, "%d,%d", y, x); */
-
-                /* mvprintw(20, 20, out); */
-                /* resize_term(y, x); */
-                break;
+        if (boardmenu->popup_open == 0) {
+            normal_handleinput(boardmenu, ch);
+            normal_renderstep(boardmenu);
+        } else {
+            popup_renderstep(boardmenu);
         }
-
-        render_step(boardmenu);
 
     }
     
@@ -180,19 +52,182 @@ main(int argc, char** argv)
 }
 
 void
-render_step(BoardMenu* boardmenu)
+normal_handleinput(BoardMenu* boardmenu, int ch)
 {
-        for (int i = 0; i < boardmenu->menu_count; i++) {
 
-            Menu* curmenu = boardmenu->menu_list[i];
+    Menu* active_menu;
+    active_menu = boardmenu->menu_list[boardmenu->selected];
 
-            /* update the descriptions - maybe not do this here */ 
-            for (int j = 0; j < get_menu_length(curmenu); j++) {
-                update_menuitem_descrip(get_menu_item(curmenu, j));
+    switch (ch) {
+
+        case BINDING_SCROLL_UP:
+            menu_driver(active_menu, MENU_UP);
+            break;
+        case BINDING_SCROLL_DOWN:
+            menu_driver(active_menu, MENU_DOWN);
+            break;
+        case BINDING_SCROLL_LEFT:
+            if (boardmenu->selected-1 < 0) break;
+            set_selected_menu(boardmenu, boardmenu->selected-1);
+            break;
+        case BINDING_SCROLL_RIGHT:
+            if (boardmenu->selected+1 > boardmenu->menu_count-1) break;
+            set_selected_menu(boardmenu, boardmenu->selected+1);
+            break;
+        case BINDING_JUMP_TOP:
+            menu_driver(active_menu, MENU_TOP);
+            break;
+        case BINDING_JUMP_BOTTOM:
+            menu_driver(active_menu, MENU_BOTTOM);
+            break;
+        case BINDING_MOVE_ITEM_UP:
+            menu_driver(active_menu, MENU_MOVE_UP);
+            break;
+        case BINDING_MOVE_ITEM_DOWN:
+            menu_driver(active_menu, MENU_MOVE_DOWN);
+            break;
+        case BINDING_MOVE_ITEM_LEFT:
+            if (boardmenu->selected-1 < 0) break;
+            if (get_menu_length(boardmenu->menu_list[boardmenu->selected]) == 0) break;
+            {
+                Menu* from_menu;
+                Menu* to_menu;
+
+                from_menu = boardmenu->menu_list[boardmenu->selected];
+                to_menu = boardmenu->menu_list[boardmenu->selected-1];
+
+                insert_item(
+                    to_menu,
+                    get_menu_item(
+                        from_menu,
+                        get_selected_item(from_menu)
+                    ),
+                    min(
+                        get_selected_item(from_menu),
+                        get_menu_length(to_menu)
+                    )
+                );
+                delete_item(
+                    from_menu,
+                    get_selected_item(from_menu) 
+                );
+                set_selected_menu(boardmenu, boardmenu->selected-1);
             }
 
-            render_menu(curmenu);
+            break;
+        case BINDING_MOVE_ITEM_RIGHT:
+            if (boardmenu->selected >= boardmenu->menu_count-1) break;
+            if (get_menu_length(boardmenu->menu_list[boardmenu->selected]) == 0) break;
+            // this is legit cpy paste please fix this
+            {
+                Menu* from_menu;
+                Menu* to_menu;
+
+                from_menu = boardmenu->menu_list[boardmenu->selected];
+                to_menu = boardmenu->menu_list[boardmenu->selected+1];
+
+                insert_item(
+                    to_menu,
+                    get_menu_item(
+                        from_menu,
+                        get_selected_item(from_menu)
+                    ),
+                    min(
+                        get_selected_item(from_menu),
+                        get_menu_length(to_menu)
+                    )
+                );
+                delete_item(
+                    from_menu,
+                    get_selected_item(from_menu) 
+                );
+                set_selected_menu(boardmenu, boardmenu->selected+1);
+            }
+
+            break;
+        case BINDING_DELETE_ITEM:
+            menu_driver(active_menu, MENU_DELETE);
+            break;
+        case BINDING_APPEND_ITEM:
+            menu_driver(active_menu, MENU_APPEND);
+            break;
+        case BINDING_INSERT_ABOVE:
+            menu_driver(active_menu, MENU_INSERT_ABOVE);
+            break;
+        case BINDING_INSERT_BELOW:
+            menu_driver(active_menu, MENU_INSERT_BELOW);
+            break;
+        /* case BINDING_MOVE_MENU_LEFT: */
+        /*     if (boardmenu->selected-1 < 0) break; */
+
+        /*     swap_menu(boardmenu, boardmenu->selected, boardmenu->selected-1); */
+            /* boardmenu->selected -= 1; */
+            /* set_selected_menu(boardmenu, boardmenu->selected); */
+
+            /* break; */
+        /* case BINDING_MOVE_MENU_RIGHT: */
+            /* if (boardmenu->selected >= boardmenu->menu_count-1) break; */
+            /* swap_menu(boardmenu, boardmenu->selected, boardmenu->selected+1); */
+            /* boardmenu->selected += 1; */
+            /* set_selected_menu(boardmenu, boardmenu->selected); */
+
+            /* break; */
+        case BINDING_EDIT_ITEM:
+            menu_driver(active_menu, MENU_EDIT);
+            break;
+        case BINDING_SELECT:
+            {
+                Menu* sel_menu;
+                TodoItem* sel_itemdata;
+
+                sel_menu = boardmenu->menu_list[boardmenu->selected];
+                sel_itemdata = (TodoItem*)get_menuitem_userdata(
+                    get_menu_item(sel_menu, get_selected_item(sel_menu))
+                );
+
+                /* set mode to popup */
+                boardmenu->popup_menu = make_popup_menu(sel_itemdata);
+                boardmenu->popup_open = 1;
+            } 
+
+            break;
+        case BINDING_WRITE:
+            save_to_file(boardfile_name, boardmenu);
+            break;
+        case KEY_RESIZE:
+            /* ; */
+            /* int y, x; */
+            /* char out[10]; */
+            /* getmaxyx(stdscr, y, x); */
+            /* sprintf(out, "%d,%d", y, x); */
+
+            /* mvprintw(20, 20, out); */
+            /* resize_term(y, x); */
+            break;
+    }
+}
+
+void
+normal_renderstep(BoardMenu* boardmenu)
+{
+    for (int i = 0; i < boardmenu->menu_count; i++) {
+
+        Menu* curmenu = boardmenu->menu_list[i];
+
+        /* update the descriptions - maybe not do this here */ 
+        for (int j = 0; j < get_menu_length(curmenu); j++) {
+            update_menuitem_descrip(get_menu_item(curmenu, j));
         }
+
+        render_menu(curmenu);
+    }
+}
+
+void
+popup_renderstep(BoardMenu* boardmenu)
+{
+    if (boardmenu->popup_menu == NULL) return;
+
 }
 
 void

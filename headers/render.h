@@ -9,6 +9,7 @@
 
 // this is temp
 #define MENU_WIDTH 40
+#define POPUP_BORDER 2
 
 enum TaskasaurColors {
     TS_SELECTED = 1,
@@ -21,6 +22,8 @@ typedef struct BoardMenu {
     Menu** menu_list;
     int menu_count;
     int selected;
+    Menu* popup_menu;
+    int popup_open;
 } BoardMenu;
 
 /* the ts is used to not conflict with builtin names */
@@ -43,7 +46,9 @@ extern int swap_menu(BoardMenu* boardmenu, int src_index, int dest_index);
 extern int update_menuitem_descrip(MenuItem* menuitem);
 
 /* popup menu for menu item */
-extern WINDOW* create_popup_win();
+extern Menu* make_popup_menu(TodoItem* itemdata);
+extern WINDOW* create_popup_win(TodoItem* item_info);
+extern MenuItem** subtasklist_to_menuitem(SubTask** subtask_list, int list_length);
 
 /* some helpers */
 extern int ungetstr(char* str);
