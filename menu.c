@@ -377,12 +377,11 @@ render_menu(Menu* menu)
 {
     /* draw outer menu (prob dont need this every render) */ 
     /* wclear(menu->menu_win); */
-    wattron(menu->menu_win, COLOR_PAIR(
-        (menu->focused == true) ?
-        TS_MENU_SELECTED: TS_MENU_NONSELECTED       
-    ));
+    int titlecolor;
+    titlecolor = COLOR_PAIR((menu->focused == true) ? TS_MENU_SELECTED: TS_MENU_NONSELECTED);
+    wattron(menu->menu_win, titlecolor);
     mvwprintw(menu->menu_win, 0, MENU_PAD_LEFT, menu->menu_name);
-    wattroff(menu->menu_win, COLOR_PAIR(0));
+    wattroff(menu->menu_win, titlecolor);
 
     /* draw inner menu */
     wclear(menu->sub_win);
@@ -429,15 +428,14 @@ int
 render_item(Menu* menu, int item_index, int start_y)
 {
     MenuItem* curitem;
+    int hlcolor;
     curitem = menu->menu_items[item_index];
 
     /* color selected item */
-    wattron(menu->sub_win, COLOR_PAIR(
-       (item_index == menu->selected_item && menu->focused == true) ? 
-       TS_SELECTED : TS_NONSELECTED
-    ));
+    hlcolor = COLOR_PAIR((item_index == menu->selected_item && menu->focused == true) ? TS_SELECTED : TS_NONSELECTED);
+    wattron(menu->sub_win, hlcolor);
     mvwprintw(menu->sub_win, start_y, 0, curitem->title);
-    wattroff(menu->sub_win, COLOR_PAIR(0));
+    wattroff(menu->sub_win, hlcolor);
 
     /* display number of items */
     if (strlen(curitem->description) > 0) {

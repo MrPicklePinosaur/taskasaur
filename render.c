@@ -315,6 +315,7 @@ make_popup_menu(TodoItem* itemdata)
     box(popup_win, 0, 0);
 
     set_menu_win(new_popup_menu, popup_win);
+    set_menu_focus(new_popup_menu, 1);
 
     return new_popup_menu;
 }
@@ -327,7 +328,8 @@ render_popup_menu(Menu* popup_menu)
     popup_win = get_menu_win(popup_menu);
     wclear(popup_win);
 
-    /* box(popup_win, 0, 0); */
+    box(popup_win, 0, 0);
+
     render_menu(popup_menu);
 
     wrefresh(popup_win);
