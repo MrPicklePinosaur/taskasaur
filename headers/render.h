@@ -16,6 +16,7 @@ enum TaskasaurColors {
     TS_NONSELECTED,
     TS_MENU_SELECTED,
     TS_MENU_NONSELECTED,
+    TS_ITEMCOUNT
 };
 
 typedef struct BoardMenu {
@@ -38,6 +39,7 @@ extern BoardMenu* create_board_menu(Board* board);
 extern Menu** make_menus(Board* board, int todolist_length);
 extern MenuItem** todolist_to_menuitem(TodoItem** item_list, int list_length);
 extern Board* boardmenu_to_board(BoardMenu* boardmenu);
+extern int render_board(Board* board);
 
 extern int set_selected_menu(BoardMenu* boardmenu, int index);
 extern int swap_menu(BoardMenu* boardmenu, int src_index, int dest_index);

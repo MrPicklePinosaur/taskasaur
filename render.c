@@ -45,6 +45,7 @@ init_tscolors(void)
     init_pair(TS_NONSELECTED, non_selected_color, COLOR_BLACK);
     init_pair(TS_MENU_SELECTED, menu_selected_color, COLOR_BLACK);
     init_pair(TS_MENU_NONSELECTED, menu_non_selected_color, COLOR_BLACK);
+    init_pair(TS_ITEMCOUNT, item_count_color, COLOR_BLACK);
 
     return 0;
 }
@@ -198,6 +199,13 @@ boardmenu_to_board(BoardMenu* boardmenu)
 }
 
 int
+render_board(Board* board)
+{
+
+    return 0;
+}
+
+int
 set_selected_menu(BoardMenu* boardmenu, int index)
 {
     Menu* old_menu;
@@ -312,7 +320,6 @@ make_popup_menu(TodoItem* itemdata)
         POPUP_BORDER,
         POPUP_BORDER*2
     );
-    box(popup_win, 0, 0);
 
     set_menu_win(new_popup_menu, popup_win);
     set_menu_focus(new_popup_menu, 1);
@@ -327,8 +334,6 @@ render_popup_menu(Menu* popup_menu)
 
     popup_win = get_menu_win(popup_menu);
     wclear(popup_win);
-
-    box(popup_win, 0, 0);
 
     render_menu(popup_menu);
 

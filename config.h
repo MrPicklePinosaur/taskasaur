@@ -23,6 +23,10 @@ static int selected_color = COLOR_MAGENTA;
 static int non_selected_color = COLOR_WHITE;
 static int menu_selected_color = COLOR_CYAN;
 static int menu_non_selected_color = COLOR_GREEN;
+static int item_count_color = COLOR_YELLOW;
+static int due_faraway_color = COLOR_GREEN;
+static int due_soon_color = COLOR_YELLOW;
+static int due_urgent_color = COLOR_RED;
 
 /* KEYS */
 #define BINDING_QUIT 'q'

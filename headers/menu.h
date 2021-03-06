@@ -30,7 +30,6 @@ extern MenuItem* create_menuitem(char* title);
 extern Menu* create_menu(char* menu_name, MenuItem** item_list);
 
 extern WINDOW* get_menu_win(Menu* menu);
-extern WINDOW* get_menu_subwin(Menu* menu);
 extern MenuItem* get_menu_item(Menu* menu, int index);
 extern int get_selected_item(Menu* menu);
 extern int get_menu_length(Menu* menu);

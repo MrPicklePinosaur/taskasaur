@@ -14,6 +14,8 @@ void normal_renderstep(BoardMenu* boardmenu);
 void popup_renderstep(BoardMenu* boardmenu);
 void save_to_file(char* filepath, BoardMenu* boardmenu);
 
+void exit_step(BoardMenu* boardmenu);
+
 int
 main(int argc, char** argv)
 {
@@ -34,7 +36,9 @@ main(int argc, char** argv)
     normal_renderstep(boardmenu);
 
     int ch;
-    while ((ch = getch()) != BINDING_QUIT) {
+    while (1) {
+        
+        ch = getch();
 
         if (boardmenu->popup_open == 0) {
             normal_handleinput(boardmenu, ch);
@@ -49,7 +53,6 @@ main(int argc, char** argv)
     /* save on exit - this causes weird stuff to happen, maybe it's not given enough time to write before program exits? */
     /* save_to_file(boardfile_name, boardmenu); */
 
-    exit_tscurses();
     return 0;    
 }
 
@@ -196,6 +199,9 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
         case BINDING_WRITE:
             save_to_file(boardfile_name, boardmenu);
             break;
+        case BINDING_QUIT:
+            exit_step(boardmenu);
+            break;
         case KEY_RESIZE:
             /* ; */
             /* int y, x; */
@@ -223,6 +229,9 @@ popup_handleinput(BoardMenu* boardmenu, int ch)
             break;
         case BINDING_SCROLL_DOWN:
             menu_driver(popup_menu, MENU_DOWN);
+            break;
+        case BINDING_QUIT:
+            boardmenu->popup_open = 0;
             break;
     }    
 }
@@ -260,4 +269,11 @@ save_to_file(char* filepath, BoardMenu* boardmenu)
 
     begin_write(filepath, writeboard);
     free_board(writeboard);
+}
+
+void
+exit_step(BoardMenu* boardmenu)
+{
+    exit_tscurses();
+    exit(0);
 }
