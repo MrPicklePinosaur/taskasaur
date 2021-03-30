@@ -161,7 +161,6 @@ set_menu_win(Menu* menu, WINDOW* win)
     menu->menu_win = win;
     getmaxyx(menu->menu_win, height, width);
 
-    /* create a subwin (also prob free old subwin?) */
     menu->max_height = height-MENU_PAD_TOP-MENU_PAD_BOTTOM;
     menu->max_width = width-MENU_PAD_LEFT-MENU_PAD_RIGHT;
 
@@ -389,7 +388,6 @@ render_menu(Menu* menu)
         curline += render_item(menu, i, curline);
     }
 
-    wrefresh(menu->menu_win);
     wrefresh(menu->menu_win);
 
     return 0;

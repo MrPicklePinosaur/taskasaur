@@ -19,11 +19,16 @@ enum TaskasaurColors {
     TS_ITEMCOUNT
 };
 
+typedef struct PopupMenu {
+    WINDOW* win;
+    Menu* menu;
+} PopupMenu;
+
 typedef struct BoardMenu {
     Menu** menu_list;
     int menu_count;
     int selected;
-    Menu* popup_menu;
+    PopupMenu* popupmenu;
     int popup_open;
 } BoardMenu;
 
@@ -48,9 +53,9 @@ extern int swap_menu(BoardMenu* boardmenu, int src_index, int dest_index);
 extern int update_menuitem_descrip(MenuItem* menuitem);
 
 /* popup menu for menu item */
-extern Menu* make_popup_menu(TodoItem* itemdata);
+extern PopupMenu* make_popupmenu(TodoItem* itemdata);
 extern WINDOW* create_popup_win(TodoItem* item_info);
-extern int render_popup_menu(Menu* popup_menu);
+extern int render_popupmenu(PopupMenu* popupmenu);
 extern MenuItem** subtasklist_to_menuitem(SubTask** subtask_list, int list_length);
 
 /* some helpers */

@@ -3,6 +3,11 @@
 #include <string.h>
 #include "config.h"
 
+#define POPUP_MENU_PAD_TOP 2
+#define POPUP_MENU_PAD_BOTTOM 2
+#define POPUP_MENU_PAD_LEFT 2
+#define POPUP_MENU_PAD_RIGHT 1
+
 int init_tscolors(void);
 int create_todowin(void);
 
@@ -85,7 +90,7 @@ create_board_menu(Board* board)
     new_boardmenu->menu_list = make_menus(board, board->todolist_count);
     new_boardmenu->menu_count = board->todolist_count;
     new_boardmenu->selected = 0;
-    new_boardmenu->popup_menu = NULL;
+    new_boardmenu->popupmenu = NULL;
     new_boardmenu->popup_open = 0;
 
     return new_boardmenu;
@@ -301,43 +306,58 @@ update_menuitem_descrip(MenuItem* menuitem)
 }
 
 /* popup */
-Menu*
-make_popup_menu(TodoItem* itemdata)
+PopupMenu*
+make_popupmenu(TodoItem* itemdata)
 {
+    PopupMenu* new_popupmenu;
     MenuItem** subtask_menuitems;
-    Menu* new_popup_menu;
-    WINDOW* popup_win;
+    Menu* popupmenu_menu;
+    WINDOW* popupmenu_win;
+    WINDOW* popupmenu_menu_win;
+
+    new_popupmenu = malloc(sizeof(PopupMenu));
 
     subtask_menuitems = subtasklist_to_menuitem(itemdata->subtask_list, itemdata->subtask_count);
-    new_popup_menu = create_menu(strdup(""), subtask_menuitems);
+    popupmenu_menu = create_menu(strdup(""), subtask_menuitems);
 
     /* popup win */
     int maxheight, maxwidth;
     getmaxyx(stdscr, maxheight, maxwidth);
-    popup_win = newwin(
+    popupmenu_win = newwin(
         maxheight-2*POPUP_BORDER,
         maxwidth-2*2*POPUP_BORDER,
         POPUP_BORDER,
         POPUP_BORDER*2
     );
 
-    set_menu_win(new_popup_menu, popup_win);
-    set_menu_focus(new_popup_menu, 1);
+    int popup_maxheight, popup_maxwidth;
+    getmaxyx(popupmenu_win, popup_maxheight, popup_maxwidth);
+    popupmenu_menu_win = derwin(
+        popupmenu_win,
+        popup_maxheight-POPUP_MENU_PAD_TOP-POPUP_MENU_PAD_BOTTOM,
+        popup_maxwidth-POPUP_MENU_PAD_LEFT-POPUP_MENU_PAD_RIGHT,
+        POPUP_MENU_PAD_TOP,
+        POPUP_MENU_PAD_LEFT
+    );
 
-    return new_popup_menu;
+    set_menu_win(popupmenu_menu, popupmenu_menu_win);
+    set_menu_focus(popupmenu_menu, 1);
+    box(popupmenu_win, 0, 0);
+    box(popupmenu_menu_win, 0, 0);
+
+    /* don't forget to free popupmenu after */
+    new_popupmenu->win = popupmenu_win;
+    new_popupmenu->menu = popupmenu_menu;
+
+    return new_popupmenu;
 }
 
 int
-render_popup_menu(Menu* popup_menu)
+render_popupmenu(PopupMenu* popupmenu)
 {
-    WINDOW* popup_win;
+    render_menu(popupmenu->menu);
 
-    popup_win = get_menu_win(popup_menu);
-    wclear(popup_win);
-
-    render_menu(popup_menu);
-
-    wrefresh(popup_win);
+    wrefresh(popupmenu->win);
 
     return 0;
 }

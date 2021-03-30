@@ -191,7 +191,7 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
                 );
 
                 /* set mode to popup */
-                boardmenu->popup_menu = make_popup_menu(sel_itemdata);
+                boardmenu->popupmenu = make_popupmenu(sel_itemdata);
                 boardmenu->popup_open = 1;
             } 
 
@@ -218,17 +218,17 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
 void
 popup_handleinput(BoardMenu* boardmenu, int ch)
 {
-    Menu* popup_menu;
+    Menu* popupmenu_menu;
 
-    popup_menu = boardmenu->popup_menu;
+    popupmenu_menu = boardmenu->popupmenu->menu;
 
     switch (ch) {
 
         case BINDING_SCROLL_UP:
-            menu_driver(popup_menu, MENU_UP);
+            menu_driver(popupmenu_menu, MENU_UP);
             break;
         case BINDING_SCROLL_DOWN:
-            menu_driver(popup_menu, MENU_DOWN);
+            menu_driver(popupmenu_menu, MENU_DOWN);
             break;
         case BINDING_QUIT:
             boardmenu->popup_open = 0;
@@ -255,10 +255,9 @@ normal_renderstep(BoardMenu* boardmenu)
 void
 popup_renderstep(BoardMenu* boardmenu)
 {
-    if (boardmenu->popup_menu == NULL) return;
+    if (boardmenu->popupmenu == NULL) return;
 
-    render_popup_menu(boardmenu->popup_menu); 
-
+    render_popupmenu(boardmenu->popupmenu); 
 }
 
 void
