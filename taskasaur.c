@@ -9,6 +9,7 @@ char* boardfile_name = "test_board.md";
 
 void normal_handleinput(BoardMenu* boardmenu, int ch);
 void popup_handleinput(BoardMenu* boardmenu, int ch);
+void generic_handleinput(Menu* menu, int ch);
 
 void normal_renderstep(BoardMenu* boardmenu);
 void popup_renderstep(BoardMenu* boardmenu);
@@ -65,12 +66,6 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
 
     switch (ch) {
 
-        case BINDING_SCROLL_UP:
-            menu_driver(active_menu, MENU_UP);
-            break;
-        case BINDING_SCROLL_DOWN:
-            menu_driver(active_menu, MENU_DOWN);
-            break;
         case BINDING_SCROLL_LEFT:
             if (boardmenu->selected-1 < 0) break;
             set_selected_menu(boardmenu, boardmenu->selected-1);
@@ -78,18 +73,6 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
         case BINDING_SCROLL_RIGHT:
             if (boardmenu->selected+1 > boardmenu->menu_count-1) break;
             set_selected_menu(boardmenu, boardmenu->selected+1);
-            break;
-        case BINDING_JUMP_TOP:
-            menu_driver(active_menu, MENU_TOP);
-            break;
-        case BINDING_JUMP_BOTTOM:
-            menu_driver(active_menu, MENU_BOTTOM);
-            break;
-        case BINDING_MOVE_ITEM_UP:
-            menu_driver(active_menu, MENU_MOVE_UP);
-            break;
-        case BINDING_MOVE_ITEM_DOWN:
-            menu_driver(active_menu, MENU_MOVE_DOWN);
             break;
         case BINDING_MOVE_ITEM_LEFT:
             if (boardmenu->selected-1 < 0) break;
@@ -150,18 +133,6 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
             }
 
             break;
-        case BINDING_DELETE_ITEM:
-            menu_driver(active_menu, MENU_DELETE);
-            break;
-        case BINDING_APPEND_ITEM:
-            menu_driver(active_menu, MENU_APPEND);
-            break;
-        case BINDING_INSERT_ABOVE:
-            menu_driver(active_menu, MENU_INSERT_ABOVE);
-            break;
-        case BINDING_INSERT_BELOW:
-            menu_driver(active_menu, MENU_INSERT_BELOW);
-            break;
         /* case BINDING_MOVE_MENU_LEFT: */
         /*     if (boardmenu->selected-1 < 0) break; */
 
@@ -177,9 +148,6 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
             /* set_selected_menu(boardmenu, boardmenu->selected); */
 
             /* break; */
-        case BINDING_EDIT_ITEM:
-            menu_driver(active_menu, MENU_EDIT);
-            break;
         case BINDING_SELECT:
             {
                 Menu* sel_menu;
@@ -212,6 +180,10 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
             /* mvprintw(20, 20, out); */
             /* resize_term(y, x); */
             break;
+
+        default:
+            generic_handleinput(active_menu, ch);
+
     }
 }
 
@@ -224,16 +196,55 @@ popup_handleinput(BoardMenu* boardmenu, int ch)
 
     switch (ch) {
 
-        case BINDING_SCROLL_UP:
-            menu_driver(popupmenu_menu, MENU_UP);
-            break;
-        case BINDING_SCROLL_DOWN:
-            menu_driver(popupmenu_menu, MENU_DOWN);
-            break;
         case BINDING_QUIT:
             boardmenu->popup_open = 0;
+            clear();
             break;
+
+        default:
+            generic_handleinput(popupmenu_menu, ch);
     }    
+}
+
+void
+generic_handleinput(Menu* menu, int ch)
+{
+    switch (ch) {
+
+        case BINDING_SCROLL_UP:
+            menu_driver(menu, MENU_UP);
+            break;
+        case BINDING_SCROLL_DOWN:
+            menu_driver(menu, MENU_DOWN);
+            break;
+        case BINDING_JUMP_TOP:
+            menu_driver(menu, MENU_TOP);
+            break;
+        case BINDING_JUMP_BOTTOM:
+            menu_driver(menu, MENU_BOTTOM);
+            break;
+        case BINDING_MOVE_ITEM_UP:
+            menu_driver(menu, MENU_MOVE_UP);
+            break;
+        case BINDING_MOVE_ITEM_DOWN:
+            menu_driver(menu, MENU_MOVE_DOWN);
+            break;
+        case BINDING_DELETE_ITEM:
+            menu_driver(menu, MENU_DELETE);
+            break;
+        case BINDING_APPEND_ITEM:
+            menu_driver(menu, MENU_APPEND);
+            break;
+        case BINDING_INSERT_ABOVE:
+            menu_driver(menu, MENU_INSERT_ABOVE);
+            break;
+        case BINDING_INSERT_BELOW:
+            menu_driver(menu, MENU_INSERT_BELOW);
+            break;
+        case BINDING_EDIT_ITEM:
+            menu_driver(menu, MENU_EDIT);
+            break;
+    }            
 }
 
 void

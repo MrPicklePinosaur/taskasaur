@@ -343,7 +343,9 @@ make_popupmenu(TodoItem* itemdata)
     set_menu_win(popupmenu_menu, popupmenu_menu_win);
     set_menu_focus(popupmenu_menu, 1);
     box(popupmenu_win, 0, 0);
-    box(popupmenu_menu_win, 0, 0);
+
+    /* move this stuff to render phase later? */
+    mvwprintw(popupmenu_win, 1, 2, itemdata->item_name);
 
     /* don't forget to free popupmenu after */
     new_popupmenu->win = popupmenu_win;
@@ -356,7 +358,6 @@ int
 render_popupmenu(PopupMenu* popupmenu)
 {
     render_menu(popupmenu->menu);
-
     wrefresh(popupmenu->win);
 
     return 0;
