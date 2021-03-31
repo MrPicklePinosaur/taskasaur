@@ -3,7 +3,7 @@
 #include <string.h>
 #include "config.h"
 
-#define POPUP_MENU_PAD_TOP 2
+#define POPUP_MENU_PAD_TOP 4
 #define POPUP_MENU_PAD_BOTTOM 2
 #define POPUP_MENU_PAD_LEFT 2
 #define POPUP_MENU_PAD_RIGHT 1
@@ -346,6 +346,7 @@ make_popupmenu(TodoItem* itemdata)
 
     /* move this stuff to render phase later? */
     mvwprintw(popupmenu_win, 1, 2, itemdata->item_name);
+    mvwprintw(popupmenu_win, 2, 2, (strlen(itemdata->description) > 0) ? itemdata->description : "no description");
 
     /* don't forget to free popupmenu after */
     new_popupmenu->win = popupmenu_win;

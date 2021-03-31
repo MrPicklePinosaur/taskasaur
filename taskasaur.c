@@ -201,6 +201,10 @@ popup_handleinput(BoardMenu* boardmenu, int ch)
             clear();
             break;
 
+        case BINDING_TOGGLE_DONE:
+
+            break;
+
         default:
             generic_handleinput(popupmenu_menu, ch);
     }    

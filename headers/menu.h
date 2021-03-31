@@ -43,6 +43,8 @@ extern int set_menu_win(Menu* menu, WINDOW* win);
 extern int set_selected_item(Menu* menu, int selected_item);
 extern int set_menu_focus(Menu* menu, bool focus);
 extern int set_menu_userdata(Menu* menu, void* userdata);
+extern int set_menu_renderitem(Menu* menu, void (*render_item)(Menu*, int, int));
+extern int set_menu_itemheight(Menu* menu, int (*item_height)(MenuItem*));
 extern int set_menuitem_descrip(MenuItem* menuitem, char* descrip);
 extern int set_menuitem_userdata(MenuItem* menuitem, void* userdata);
 

@@ -33,6 +33,8 @@ typedef struct Menu {
     int max_height;
     int max_width;
     void* userdata;
+    void (*render_item)(Menu*, int, int);
+    int (*item_height)(MenuItem*);
 } Menu;
 
 int swap_item(Menu* menu, int src_index, int dest_index);
@@ -44,8 +46,8 @@ int menu_insert_mode(Menu* menu, int insert_index);
 MenuItem* create_blank_menuitem(void);
 
 /* rendering stuff */
-int render_item(Menu* menu, int item_index, int start_y);
-int item_height(MenuItem* menuitem);
+void default_render_item(Menu* menu, int item_index, int start_y);
+int default_item_height(MenuItem* menuitem);
 int items_visible(Menu* menu, int offset);
 int items_visible_rev(Menu* menu, int offset);
 
@@ -89,6 +91,9 @@ create_menu(char* menu_name, MenuItem** item_list)
     new_menu->selected_item = 0;
     new_menu->scroll_offset = 0;
     new_menu->focused = false;
+    new_menu->userdata = NULL;
+    new_menu->render_item = *default_render_item;
+    new_menu->item_height = *default_item_height;
     set_menu_win(new_menu, stdscr);
 
     return new_menu;
@@ -189,6 +194,20 @@ set_menu_userdata(Menu* menu, void* userdata)
 }
 
 int
+set_menu_renderitem(Menu* menu, void (*render_item)(Menu*, int, int))
+{
+    menu->render_item = render_item;
+    return 0;
+}
+
+int
+set_menu_itemheight(Menu* menu, int (*item_height)(MenuItem*))
+{
+    menu->item_height = item_height;
+    return 0;
+}
+
+int
 set_menuitem_descrip(MenuItem* menuitem, char* descrip)
 {
     menuitem->description = descrip;
@@ -266,7 +285,7 @@ menu_insert_mode(Menu* menu, int insert_index)
     // account for multiline items
     insert_pos = menu->scroll_offset;
     for (int i = 0; i < insert_index; i++) {
-        insert_pos += item_height(menu->menu_items[i]);
+        insert_pos += menu->item_height(menu->menu_items[i]);
     }
 
     /* move cursor to right spot */
@@ -385,7 +404,8 @@ render_menu(Menu* menu)
     /* render menu items */
     int curline = 0;
     for (int i = menu->scroll_offset; i < menu->menu_length; i++) {
-        curline += render_item(menu, i, curline);
+        menu->render_item(menu, i, curline);
+        curline += menu->item_height(menu->menu_items[i]);
     }
 
     wrefresh(menu->menu_win);
@@ -393,8 +413,8 @@ render_menu(Menu* menu)
     return 0;
 }
 
-int
-render_item(Menu* menu, int item_index, int start_y)
+void
+default_render_item(Menu* menu, int item_index, int start_y)
 {
     MenuItem* curitem;
     int hlcolor;
@@ -406,28 +426,49 @@ render_item(Menu* menu, int item_index, int start_y)
     mvwprintw(menu->menu_win, start_y, 0, curitem->title);
     wattroff(menu->menu_win, hlcolor);
 
-    /* display number of items */
-    if (strlen(curitem->description) > 0) {
-        wattron(menu->menu_win, COLOR_PAIR(TS_ITEMCOUNT));
-        mvwprintw(menu->menu_win, start_y+1, 0, curitem->description); 
-        wattroff(menu->menu_win, COLOR_PAIR(TS_ITEMCOUNT));
-    }
-
-    return item_height(curitem);
 }
+
+/* int */
+/* default_render_item(Menu* menu, int item_index, int start_y) */
+/* { */
+/*     MenuItem* curitem; */
+/*     int hlcolor; */
+/*     curitem = menu->menu_items[item_index]; */
+
+/*     /1* color selected item *1/ */
+/*     hlcolor = COLOR_PAIR((item_index == menu->selected_item && menu->focused == true) ? TS_SELECTED : TS_NONSELECTED); */
+/*     wattron(menu->menu_win, hlcolor); */
+/*     mvwprintw(menu->menu_win, start_y, 0, curitem->title); */
+/*     wattroff(menu->menu_win, hlcolor); */
+
+/*     /1* display number of items *1/ */
+/*     if (strlen(curitem->description) > 0) { */
+/*         wattron(menu->menu_win, COLOR_PAIR(TS_ITEMCOUNT)); */
+/*         mvwprintw(menu->menu_win, start_y+1, 0, curitem->description); */ 
+/*         wattroff(menu->menu_win, COLOR_PAIR(TS_ITEMCOUNT)); */
+/*     } */
+
+/*     return item_height(curitem); */
+/* } */
 
 int
-item_height(MenuItem* menuitem)
-{
-    int lines;
-
-    lines = 1;
-    if (strlen(menuitem->description) > 0) {
-        lines += 1;
-    }
-
-    return lines;
+default_item_height(MenuItem* menuitem)
+{ 
+    return 1; // maybe account for line wrap by default
 }
+
+/* int */
+/* item_height(MenuItem* menuitem) */
+/* { */
+/*     int lines; */
+
+/*     lines = 1; */
+/*     if (strlen(menuitem->description) > 0) { */
+/*         lines += 1; */
+/*     } */
+
+/*     return lines; */
+/* } */
 
 int
 items_visible(Menu* menu, int offset)
@@ -441,7 +482,7 @@ items_visible(Menu* menu, int offset)
     int lines = 0;
     for (int i = offset ; i < menu->menu_length; i++) {
 
-        lines += item_height(menu->menu_items[i]);
+        lines += menu->item_height(menu->menu_items[i]);
         if (lines > maxheight) break;
         vis += 1;
 
@@ -462,7 +503,7 @@ items_visible_rev(Menu* menu, int offset)
     int lines = 0;
     for (int i = offset; i > 0; i--) {
 
-        lines += item_height(menu->menu_items[i]);
+        lines += menu->item_height(menu->menu_items[i]);
         if (lines > maxheight) break;
         vis +=1;
 

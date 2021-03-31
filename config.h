@@ -48,6 +48,7 @@ static int due_urgent_color = COLOR_RED;
 #define BINDING_MOVE_MENU_RIGHT '>'
 #define BINDING_EDIT_ITEM 'i'
 #define BINDING_SELECT '\n'
+#define BINDING_TOGGLE_DONE ' '
 #define BINDING_WRITE 'w'
 
 #endif
