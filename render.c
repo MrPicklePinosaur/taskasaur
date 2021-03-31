@@ -11,6 +11,10 @@
 int init_tscolors(void);
 int create_todowin(void);
 
+/* menu render callbacks */
+void render_menuitem(Menu* menu, int item_index, int start_y);
+int menuitem_height(MenuItem* menuitem);
+
 /* init stuff */
 int
 init_tscurses(void)
@@ -120,6 +124,10 @@ make_menus(Board* board, int todolist_length)
         set_menu_win(new_menu, win);
         set_menu_focus(new_menu, i == 0); // make first win focused
 
+        /* set menu render callbacks */
+        set_menu_renderitem(new_menu, *render_menuitem);
+        set_menu_itemheight(new_menu, *menuitem_height);
+
         /* refresh */
         refresh();
         wrefresh(win);
@@ -128,6 +136,44 @@ make_menus(Board* board, int todolist_length)
     }
 
     return menu_list;
+}
+
+void
+render_menuitem(Menu* menu, int item_index, int start_y)
+{
+    MenuItem* curitem;
+    WINDOW* menu_win;
+    int hlcolor;
+
+    curitem = get_menu_item(menu, item_index);
+    menu_win = get_menu_win(menu);
+
+    /* color selected item */
+    hlcolor = COLOR_PAIR((item_index == get_selected_item(menu) && get_menu_focused(menu) == true) ? TS_SELECTED : TS_NONSELECTED);
+    wattron(menu_win, hlcolor);
+    mvwprintw(menu_win, start_y, 0, get_menuitem_title(curitem));
+    wattroff(menu_win, hlcolor);
+
+    /* display number of items */
+    if (strlen(get_menuitem_descrip(curitem)) > 0) {
+        wattron(menu_win, COLOR_PAIR(TS_ITEMCOUNT));
+        mvwprintw(menu_win, start_y+1, 0, get_menuitem_descrip(curitem)); 
+        wattroff(menu_win, COLOR_PAIR(TS_ITEMCOUNT));
+    }
+
+}
+
+int
+menuitem_height(MenuItem* menuitem)
+{
+    int lines;
+
+    lines = 1;
+    if (strlen(get_menuitem_descrip(menuitem)) > 0) {
+        lines += 1;
+    }
+
+    return lines;
 }
 
 MenuItem** 

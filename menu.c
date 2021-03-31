@@ -120,6 +120,12 @@ get_selected_item(Menu* menu)
     return menu->selected_item;
 }
 
+bool
+get_menu_focused(Menu* menu)
+{
+    return menu->focused;
+}
+
 int
 get_menu_length(Menu* menu)
 {
@@ -418,6 +424,7 @@ default_render_item(Menu* menu, int item_index, int start_y)
 {
     MenuItem* curitem;
     int hlcolor;
+
     curitem = menu->menu_items[item_index];
 
     /* color selected item */
@@ -425,31 +432,8 @@ default_render_item(Menu* menu, int item_index, int start_y)
     wattron(menu->menu_win, hlcolor);
     mvwprintw(menu->menu_win, start_y, 0, curitem->title);
     wattroff(menu->menu_win, hlcolor);
-
 }
 
-/* int */
-/* default_render_item(Menu* menu, int item_index, int start_y) */
-/* { */
-/*     MenuItem* curitem; */
-/*     int hlcolor; */
-/*     curitem = menu->menu_items[item_index]; */
-
-/*     /1* color selected item *1/ */
-/*     hlcolor = COLOR_PAIR((item_index == menu->selected_item && menu->focused == true) ? TS_SELECTED : TS_NONSELECTED); */
-/*     wattron(menu->menu_win, hlcolor); */
-/*     mvwprintw(menu->menu_win, start_y, 0, curitem->title); */
-/*     wattroff(menu->menu_win, hlcolor); */
-
-/*     /1* display number of items *1/ */
-/*     if (strlen(curitem->description) > 0) { */
-/*         wattron(menu->menu_win, COLOR_PAIR(TS_ITEMCOUNT)); */
-/*         mvwprintw(menu->menu_win, start_y+1, 0, curitem->description); */ 
-/*         wattroff(menu->menu_win, COLOR_PAIR(TS_ITEMCOUNT)); */
-/*     } */
-
-/*     return item_height(curitem); */
-/* } */
 
 int
 default_item_height(MenuItem* menuitem)
