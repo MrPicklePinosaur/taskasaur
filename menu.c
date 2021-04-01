@@ -441,19 +441,6 @@ default_item_height(MenuItem* menuitem)
     return 1; // maybe account for line wrap by default
 }
 
-/* int */
-/* item_height(MenuItem* menuitem) */
-/* { */
-/*     int lines; */
-
-/*     lines = 1; */
-/*     if (strlen(menuitem->description) > 0) { */
-/*         lines += 1; */
-/*     } */
-
-/*     return lines; */
-/* } */
-
 int
 items_visible(Menu* menu, int offset)
 {

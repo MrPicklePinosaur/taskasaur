@@ -15,6 +15,10 @@ int create_todowin(void);
 void render_menuitem(Menu* menu, int item_index, int start_y);
 int menuitem_height(MenuItem* menuitem);
 
+void render_popup_menuitem(Menu* menu, int item_index, int start_y);
+int popup_menuitem_height(MenuItem* menuitem);
+
+
 /* init stuff */
 int
 init_tscurses(void)
@@ -388,6 +392,8 @@ make_popupmenu(TodoItem* itemdata)
 
     set_menu_win(popupmenu_menu, popupmenu_menu_win);
     set_menu_focus(popupmenu_menu, 1);
+    set_menu_renderitem(popupmenu_menu, render_popup_menuitem);
+    set_menu_itemheight(popupmenu_menu, popup_menuitem_height);
     box(popupmenu_win, 0, 0);
 
     /* move this stuff to render phase later? */
@@ -399,6 +405,38 @@ make_popupmenu(TodoItem* itemdata)
     new_popupmenu->menu = popupmenu_menu;
 
     return new_popupmenu;
+}
+
+void
+render_popup_menuitem(Menu* menu, int item_index, int start_y)
+{
+    MenuItem* curitem;
+    WINDOW* menu_win;
+    int hlcolor;
+
+    curitem = get_menu_item(menu, item_index);
+    menu_win = get_menu_win(menu);
+
+    /* color selected item */
+    hlcolor = COLOR_PAIR((item_index == get_selected_item(menu) && get_menu_focused(menu) == true) ? TS_SELECTED : TS_NONSELECTED);
+    wattron(menu_win, hlcolor);
+
+    wmove(menu_win, start_y, 0);
+    /* print subtask done indicator */
+    if (strlen(get_menuitem_title(curitem)) > 0)
+        wprintw(
+            menu_win,
+            (((SubTask*)get_menuitem_userdata(curitem))->done == SubTaskState_done) ? "[X] " : "[ ] "
+        );
+    wprintw(menu_win, get_menuitem_title(curitem));
+
+    wattroff(menu_win, hlcolor);
+}
+
+int
+popup_menuitem_height(MenuItem* menuitem)
+{
+    return 1; // account for wrap later
 }
 
 int
