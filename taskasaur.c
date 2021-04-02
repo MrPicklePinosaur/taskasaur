@@ -202,6 +202,10 @@ popup_handleinput(BoardMenu* boardmenu, int ch)
             break;
 
         case BINDING_TOGGLE_DONE:
+            {
+                SubTask* curitem_data = (SubTask*)get_menuitem_userdata(get_menu_item(popupmenu_menu, get_selected_item(popupmenu_menu))); 
+                curitem_data->done = (curitem_data->done == SubTaskState_todo) ? SubTaskState_done : SubTaskState_todo;
+            }
 
             break;
 
