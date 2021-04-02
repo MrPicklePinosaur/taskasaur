@@ -147,10 +147,12 @@ render_menuitem(Menu* menu, int item_index, int start_y)
 {
     MenuItem* curitem;
     WINDOW* menu_win;
+    TodoItem* item_data;
     int hlcolor;
 
     curitem = get_menu_item(menu, item_index);
     menu_win = get_menu_win(menu);
+    item_data = (TodoItem*)get_menuitem_userdata(curitem);
 
     /* color selected item */
     hlcolor = COLOR_PAIR((item_index == get_selected_item(menu) && get_menu_focused(menu) == true) ? TS_SELECTED : TS_NONSELECTED);
@@ -158,22 +160,34 @@ render_menuitem(Menu* menu, int item_index, int start_y)
     mvwprintw(menu_win, start_y, 0, get_menuitem_title(curitem));
     wattroff(menu_win, hlcolor);
 
-    /* display number of items */
-    if (strlen(get_menuitem_descrip(curitem)) > 0) {
-        wattron(menu_win, COLOR_PAIR(TS_ITEMCOUNT));
-        mvwprintw(menu_win, start_y+1, 0, get_menuitem_descrip(curitem)); 
-        wattroff(menu_win, COLOR_PAIR(TS_ITEMCOUNT));
+    /* item tag line */
+    wmove(menu_win, start_y+1, 0);
+    wattron(menu_win, COLOR_PAIR(TS_ITEMCOUNT));
+    /* display tiny character to indicate item has a descrip */
+    if (strlen(item_data->description) > 0) {
+        wprintw(menu_win, "# "); 
     }
-
+    /* display number of complete tasks */
+    if (item_data->subtask_count > 0) {
+        int tasks_complete = 0;
+        for (int i = 0; i < item_data->subtask_count; i++) {
+            if (item_data->subtask_list[i]->done == SubTaskState_done)
+                tasks_complete += 1;
+        }
+        wprintw(menu_win, "[%d/%d]", tasks_complete, item_data->subtask_count);
+    }
+    wattroff(menu_win, COLOR_PAIR(TS_ITEMCOUNT));
 }
 
 int
 menuitem_height(MenuItem* menuitem)
 {
+    TodoItem* item_data;
     int lines;
 
+    item_data = get_menuitem_userdata(menuitem);
     lines = 1;
-    if (strlen(get_menuitem_descrip(menuitem)) > 0) {
+    if (item_data->subtask_count > 0 || strlen(item_data->description) > 0) {
         lines += 1;
     }
 
@@ -305,52 +319,6 @@ swap_menu(BoardMenu* boardmenu, int src_index, int dest_index)
 
     /* swap in array */
     ar_swap_item((void*)boardmenu->menu_list, src_index, dest_index);
-
-    return 0;
-}
-
-/* menuitem */
-int
-update_menuitem_descrip(MenuItem* menuitem)
-{ /* need to do something about colored text */
-
-    TodoItem* item_data;    
-    char* new_descrip;
-
-    item_data = (TodoItem*)get_menuitem_userdata(menuitem);
-    new_descrip = strdup("");
-
-    if (strlen(item_data->description) > 0) {
-        /* strcat(new_descrip, "☰ "); */
-        strcat(new_descrip, "# ");
-    }
-    if (strlen(item_data->due) > 0) {
-        strcat(new_descrip, item_data->due);
-        strcat(new_descrip, " ");
-    }
-    if (item_data->subtask_count > 0) {
-
-        int tasks_complete = 0;
-        for (int i = 0; i < item_data->subtask_count; i++) {
-            if (item_data->subtask_list[i]->done == SubTaskState_done) {
-                tasks_complete += 1;
-            }
-        }
-
-        /* [, # done, /, # total, ], null */
-        char subtask_done[4]; // assume there wont be more than 999 subtasks (possibly danger?)
-        snprintf(subtask_done, 4, "%d", tasks_complete);
-        int substask_len = 1+item_data->subtask_count+1+strlen(subtask_done)+1+1;
-        char subtask_text[substask_len];
-        sprintf(subtask_text, "[%s/%d]", subtask_done, item_data->subtask_count);
-        strcat(new_descrip, subtask_text);
-    }
-
-    /* free old string */
-    if (strlen(new_descrip) > 0) {
-        free(get_menuitem_descrip(menuitem));
-        set_menuitem_descrip(menuitem, new_descrip); 
-    }
 
     return 0;
 }
