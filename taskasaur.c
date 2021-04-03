@@ -11,8 +11,7 @@ void normal_handleinput(BoardMenu* boardmenu, int ch);
 void popup_handleinput(BoardMenu* boardmenu, int ch);
 void generic_handleinput(Menu* menu, int ch);
 
-void normal_renderstep(BoardMenu* boardmenu);
-void popup_renderstep(BoardMenu* boardmenu);
+void renderstep(BoardMenu* boardmenu);
 void save_to_file(char* filepath, BoardMenu* boardmenu);
 
 void exit_step(BoardMenu* boardmenu);
@@ -34,20 +33,20 @@ main(int argc, char** argv)
     boardmenu = create_board_menu(board);
 
     /* need to render before user presses anything */
-    normal_renderstep(boardmenu);
+    renderstep(boardmenu);
 
     int ch;
     while (1) {
-        
+
         ch = getch();
 
         if (boardmenu->popup_open == 0) {
             normal_handleinput(boardmenu, ch);
-            normal_renderstep(boardmenu);
         } else {
             popup_handleinput(boardmenu, ch);
-            popup_renderstep(boardmenu);
         }
+
+        renderstep(boardmenu);
 
     }
     
@@ -86,10 +85,7 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
 
                 insert_item(
                     to_menu,
-                    get_menu_item(
-                        from_menu,
-                        get_selected_item(from_menu)
-                    ),
+                    get_selected_menuitem(from_menu),
                     min(
                         get_selected_item(from_menu),
                         get_menu_length(to_menu)
@@ -116,10 +112,7 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
 
                 insert_item(
                     to_menu,
-                    get_menu_item(
-                        from_menu,
-                        get_selected_item(from_menu)
-                    ),
+                    get_selected_menuitem(from_menu),
                     min(
                         get_selected_item(from_menu),
                         get_menu_length(to_menu)
@@ -161,6 +154,7 @@ normal_handleinput(BoardMenu* boardmenu, int ch)
                 /* set mode to popup */
                 boardmenu->popupmenu = make_popupmenu(sel_itemdata);
                 boardmenu->popup_open = 1;
+
             } 
 
             break;
@@ -198,13 +192,17 @@ popup_handleinput(BoardMenu* boardmenu, int ch)
 
         case BINDING_QUIT:
             boardmenu->popup_open = 0;
+            
+            /* reset screen */
             clear();
+            renderstep(boardmenu);
             break;
 
         case BINDING_TOGGLE_DONE:
             {
                 SubTask* curitem_data = (SubTask*)get_menuitem_userdata(get_menu_item(popupmenu_menu, get_selected_item(popupmenu_menu))); 
                 curitem_data->done = (curitem_data->done == SubTaskState_todo) ? SubTaskState_done : SubTaskState_todo;
+                /* save_popupmenu_state(popupmenu_menu); */
             }
 
             break;
@@ -256,27 +254,28 @@ generic_handleinput(Menu* menu, int ch)
 }
 
 void
-normal_renderstep(BoardMenu* boardmenu)
+renderstep(BoardMenu* boardmenu)
 {
-    for (int i = 0; i < boardmenu->menu_count; i++) {
+    /* render main board menu */
+    if (boardmenu->popup_open == 0) {
+        for (int i = 0; i < boardmenu->menu_count; i++) {
 
-        Menu* curmenu = boardmenu->menu_list[i];
+            Menu* curmenu = boardmenu->menu_list[i];
 
-        /* update the descriptions - maybe not do this here */ 
-        for (int j = 0; j < get_menu_length(curmenu); j++) {
-            update_menuitem_descrip(get_menu_item(curmenu, j));
+            render_menu(curmenu);
         }
 
-        render_menu(curmenu);
+    /* render popup if it's open */
+    } else {
+
+        // something weird happened, maybe raise error
+        /* if (boradmenu->popupmenu == NULL) return; */
+
+        render_menu(boardmenu->popupmenu->menu);
+        wrefresh(boardmenu->popupmenu->win);
+
     }
-}
-
-void
-popup_renderstep(BoardMenu* boardmenu)
-{
-    if (boardmenu->popupmenu == NULL) return;
-
-    render_popupmenu(boardmenu->popupmenu); 
+    refresh();
 }
 
 void

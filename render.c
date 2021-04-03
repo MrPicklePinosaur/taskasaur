@@ -407,13 +407,17 @@ popup_menuitem_height(MenuItem* menuitem)
     return 1; // account for wrap later
 }
 
-int
-render_popupmenu(PopupMenu* popupmenu)
+/* save menu state to userdata */
+/* sorta duct tape rn */
+/* find a way to tie TodoItem and MenuItem together better in the future */
+void
+save_popupmenu_state(Menu* popupmenu_menu)
 {
-    render_menu(popupmenu->menu);
-    wrefresh(popupmenu->win);
+    /* TodoItem* item_data; */
 
-    return 0;
+    /* item_data = get_menu_userdata(popupmenu_menu); */
+    /* item_data->subtask_count = array_length(SubTask*, item_data->subtask_list); */
+
 }
 
 /* this is copy paste of other, prob abstract */

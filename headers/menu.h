@@ -31,7 +31,8 @@ extern Menu* create_menu(char* menu_name, MenuItem** item_list);
 
 extern WINDOW* get_menu_win(Menu* menu);
 extern MenuItem* get_menu_item(Menu* menu, int index);
-extern int get_selected_item(Menu* menu);
+extern int get_selected_item(Menu* menu); // rename this to selected_index or sm
+extern MenuItem* get_selected_menuitem(Menu* menu);
 extern bool get_menu_focused(Menu* menu);
 extern int get_menu_length(Menu* menu);
 extern char* get_menu_name(Menu* menu);

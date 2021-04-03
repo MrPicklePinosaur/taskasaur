@@ -120,6 +120,12 @@ get_selected_item(Menu* menu)
     return menu->selected_item;
 }
 
+MenuItem*
+get_selected_menuitem(Menu* menu)
+{
+    return get_menu_item(menu, get_selected_item(menu));
+}
+
 bool
 get_menu_focused(Menu* menu)
 {
