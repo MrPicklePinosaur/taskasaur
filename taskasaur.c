@@ -192,6 +192,7 @@ popup_handleinput(BoardMenu* boardmenu, int ch)
 
         case BINDING_QUIT:
             boardmenu->popup_open = 0;
+            close_popupmenu(popupmenu_menu);
             
             /* reset screen */
             clear();
@@ -202,7 +203,6 @@ popup_handleinput(BoardMenu* boardmenu, int ch)
             {
                 SubTask* curitem_data = (SubTask*)get_menuitem_userdata(get_menu_item(popupmenu_menu, get_selected_item(popupmenu_menu))); 
                 curitem_data->done = (curitem_data->done == SubTaskState_todo) ? SubTaskState_done : SubTaskState_todo;
-                /* save_popupmenu_state(popupmenu_menu); */
             }
 
             break;

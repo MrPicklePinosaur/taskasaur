@@ -114,6 +114,12 @@ get_menu_item(Menu* menu, int index)
     return menu->menu_items[index];
 }
 
+MenuItem**
+get_menu_itemlist(Menu* menu)
+{
+    return menu->menu_items;
+}
+
 int
 get_selected_item(Menu* menu)
 {
@@ -216,6 +222,13 @@ int
 set_menu_itemheight(Menu* menu, int (*item_height)(MenuItem*))
 {
     menu->item_height = item_height;
+    return 0;
+}
+
+int
+set_menuitem_title(MenuItem* menuitem, char* title)
+{
+    menuitem->title = title;
     return 0;
 }
 

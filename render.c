@@ -359,6 +359,7 @@ make_popupmenu(TodoItem* itemdata)
     );
 
     set_menu_win(popupmenu_menu, popupmenu_menu_win);
+    set_menu_userdata(popupmenu_menu, itemdata);
     set_menu_focus(popupmenu_menu, 1);
     set_menu_renderitem(popupmenu_menu, render_popup_menuitem);
     set_menu_itemheight(popupmenu_menu, popup_menuitem_height);
@@ -395,8 +396,10 @@ render_popup_menuitem(Menu* menu, int item_index, int start_y)
         wprintw(
             menu_win,
             (((SubTask*)get_menuitem_userdata(curitem))->done == SubTaskState_done) ? "[X] " : "[ ] "
+            /* (((TodoItem*)get_menu_userdata(menu))->subtask_list[item_index]->done == SubTaskState_done) ? "[X] " : "[ ] " */
         );
     wprintw(menu_win, get_menuitem_title(curitem));
+    /* wprintw(menu_win, ((TodoItem*)get_menu_userdata(menu))->subtask_list[item_index]->subtask_name); */
 
     wattroff(menu_win, hlcolor);
 }
@@ -411,13 +414,29 @@ popup_menuitem_height(MenuItem* menuitem)
 /* sorta duct tape rn */
 /* find a way to tie TodoItem and MenuItem together better in the future */
 void
-save_popupmenu_state(Menu* popupmenu_menu)
+close_popupmenu(Menu* popupmenu_menu)
 {
-    /* TodoItem* item_data; */
+    TodoItem* item_data;
+    SubTask** updated_subtasklist;
 
-    /* item_data = get_menu_userdata(popupmenu_menu); */
-    /* item_data->subtask_count = array_length(SubTask*, item_data->subtask_list); */
+    item_data = (TodoItem*)get_menu_userdata(popupmenu_menu);
+    updated_subtasklist = menuitem_to_subtasklist(
+        get_menu_itemlist(popupmenu_menu),
+        get_menu_length(popupmenu_menu)
+    );
 
+    /* remember to free old subtask list */
+    item_data->subtask_list = updated_subtasklist;
+    item_data->subtask_count = get_menu_length(popupmenu_menu);
+
+    /* this is messy but since subtask rendering uses menuitem title instead
+     * of userdata subtask title, this needs to be done :( */ 
+    /* for (int i = 0; i < get_menu_length(popupmenu_menu); i++) { */
+    /*     set_menuitem_title( */
+    /*         get_menu_item(popupmenu_menu, i), */
+    /*         strdup(item_data->subtask_list[i]->subtask_name) */
+    /*     ); */
+    /* } */
 }
 
 /* this is copy paste of other, prob abstract */
@@ -439,6 +458,32 @@ subtasklist_to_menuitem(SubTask** subtask_list, int list_length)
     items[list_length] = 0; //null terminate
     return items;
 }
+
+SubTask**
+menuitem_to_subtasklist(MenuItem** menuitem_list, int list_length)
+{
+    SubTask** new_subtasklist;
+
+    new_subtasklist = malloc(list_length*sizeof(SubTask*));
+
+    for (int i = 0; i < list_length; i++) {
+        SubTask* cur_subtask;
+        SubTask* new_subtask;
+
+        cur_subtask = (SubTask*)get_menuitem_userdata(menuitem_list[i]);
+        new_subtask = malloc(sizeof(SubTask));
+
+        new_subtask->subtask_name = strdup(cur_subtask->subtask_name);
+        new_subtask->done = cur_subtask->done;
+
+        new_subtasklist[i] = new_subtask;
+    }
+
+    /* new_subtasklist[list_length] = 0; */
+
+    return new_subtasklist;
+}
+
 
 /* helpers */
 int

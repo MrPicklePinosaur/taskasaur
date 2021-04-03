@@ -55,8 +55,9 @@ extern int update_menuitem_descrip(MenuItem* menuitem);
 /* popup menu for menu item */
 extern PopupMenu* make_popupmenu(TodoItem* itemdata);
 extern WINDOW* create_popup_win(TodoItem* item_info);
-extern void save_popupmenu_state(Menu* popupmenu_menu);
+extern void close_popupmenu(Menu* popupmenu_menu);
 extern MenuItem** subtasklist_to_menuitem(SubTask** subtask_list, int list_length);
+extern SubTask** menuitem_to_subtasklist(MenuItem** menuitem_list, int list_length);
 
 /* some helpers */
 extern int ungetstr(char* str);
